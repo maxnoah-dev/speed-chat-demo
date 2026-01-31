@@ -13,7 +13,9 @@ jobs:
           username: ${{ vars.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
           script: |
+            pwd
             cd social-full-demo
+            pwd
             git pull origin fe-nginx-demo
             docker-compose down
             docker-compose build

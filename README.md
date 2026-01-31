@@ -30,7 +30,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Backend chạy tại: http://152.42.188.186:3002
+Backend chạy tại: http://localhost:3002
 
 ### 3. Frontend
 
@@ -40,7 +40,7 @@ npm install
 npm start
 ```
 
-Frontend chạy tại: http://152.42.188.186:3003
+Frontend chạy tại: http://localhost:3003
 
 ## API Endpoints
 

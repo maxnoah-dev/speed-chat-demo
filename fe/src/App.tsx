@@ -25,8 +25,8 @@ function App() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [newPost, setNewPost] = useState({ user_id: '', title: '', content: '' });
-
-  useEffect(() => {
+ 
+  useEffect(() => { 
     fetchData();
   }, []);
 

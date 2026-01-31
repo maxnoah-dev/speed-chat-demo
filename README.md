@@ -14,31 +14,15 @@ social-full-demo/
 ## Setup
 
 ### 1. Database
-
-Chạy file `database.sql` trong MySQL để tạo database và tables:
+Mở docker, chạy trong CLI localhost hoặc chạy trong VPS để khởi tạo MYSQL DB:
 ```bash
-mysql -u root -p < database.sql
+docker run -d -p 3306:3306 --name social_demo -e MYSQL_ROOT_PASSWORD=EcmkSiw4ec6ZD0KtScZdpo8gxhpLdFNZnUxUiidKplR mysql
 ```
 
-### 2. Backend
+Dùng Table Plus để mở cổng 3306 của host localhost hoặc IP của VPS, copy nội dung của `database.sql` vào trong Query trong Table Plus để tạo database và tables.
 
-```bash
-cd be
-npm install
-cp .env.example .env
-# Cập nhật thông tin database trong .env
-npm run dev
-```
 
 Backend chạy tại: http://localhost:3002
-
-### 3. Frontend
-
-```bash
-cd fe
-npm install
-npm start
-```
 
 Frontend chạy tại: http://localhost:3003
 

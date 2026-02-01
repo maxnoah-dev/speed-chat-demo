@@ -14,7 +14,7 @@ social-full-demo/
 ## Setup
 
 ### 1. Database
-Mở docker, chạy trong CLI localhost hoặc chạy trong VPS để khởi tạo MYSQL DB:
+Mở docker, chạy trong CLI localhost hoặc chạy trong VPS để khởi tạo MYSQL DB
 ```bash
 docker run -d -p 3306:3306 --name social_demo -e MYSQL_ROOT_PASSWORD=EcmkSiw4ec6ZD0KtScZdpo8gxhpLdFNZnUxUiidKplR mysql
 ```

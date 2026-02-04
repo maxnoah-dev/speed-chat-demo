@@ -6,7 +6,7 @@ services:
     build:
       context: ./fe
       args:
-        - REACT_APP_API_URL=${REACT_APP_API_URL:-http://167.99.72.160:3002}
+        - REACT_APP_API_URL=${REACT_APP_API_URL:-http://152.42.234.73:3002}
     restart: unless-stopped
 
   be-nodejs:

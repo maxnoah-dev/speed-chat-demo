@@ -4,9 +4,10 @@ import pool from './config/database';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
+const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3003";
 
 app.use(cors({
-  origin: ["http://167.99.72.160:3003"],
+  origin: [CORS_ORIGIN],
   credentials: true,
 }));
 
@@ -63,5 +64,5 @@ app.get('/api/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://167.99.72.160:${PORT}`);
+  console.log(`Server is running on http://188.166.234.37:${PORT}`);
 });

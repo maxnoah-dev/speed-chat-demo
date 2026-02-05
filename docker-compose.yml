@@ -6,7 +6,7 @@ services:
     build:
       context: ./fe
       args:
-        - REACT_APP_API_URL=${REACT_APP_API_URL:-http://152.42.234.73:3002}
+        - REACT_APP_API_URL=${REACT_APP_API_URL:-http://188.166.234.37:3002}
     restart: unless-stopped
 
   be-nodejs:
@@ -20,4 +20,5 @@ services:
       - PORT=${BE_PORT:-3002}
       - DB_USER=${DB_USER:-root}
       - DB_NAME=${DB_NAME:-social_demo}
+      - CORS_ORIGIN=${CORS_ORIGIN}
     restart: unless-stopped

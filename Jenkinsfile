@@ -13,11 +13,12 @@ pipline {
             withCredentials(
                 [sshUserPrivateKey(credentialsId: 'ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]){
                     sh """
-                        ssh -o StictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${SSH_IP}
+                        ssh -o StictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${SSH_IP} '
                         cd ${DEPLOY_PATH} && git pull origin ${DEPLOYMENT_GITHUB_BRANCH}
                         docker-compose down
                         docker-compose build
                         docker-compose up -d
+                        '
                     """
             }
         }

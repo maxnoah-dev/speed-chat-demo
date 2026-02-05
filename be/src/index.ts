@@ -4,7 +4,7 @@ import pool from './config/database';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
-const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3003";
+const CORS_ORIGIN = process.env.CORS_ORIGIN || '';
 
 app.use(cors({
   origin: [CORS_ORIGIN],

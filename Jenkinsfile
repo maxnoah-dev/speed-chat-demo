@@ -11,9 +11,9 @@ pipline {
     stages{
         stage('Deploy nodejs'){
             withCredentials(
-                [sshUserPrivateKey(credentialsId: 'ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]){
+                [sshUserPrivateKey(credentialsId: 'ssh-key', keyFileVariable: 'SSHKEY', usernameVariable: 'SSHUSER')]){
                     sh """
-                        ssh -o StictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${SSH_IP} '
+                        ssh -o StictHostKeyChecking=no -i ${SSHKEY} ${SSHUSER}@${SSH_IP} '
                         cd ${DEPLOY_PATH} && git pull origin ${DEPLOYMENT_GITHUB_BRANCH}
                         docker-compose down
                         docker-compose build

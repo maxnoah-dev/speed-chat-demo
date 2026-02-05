@@ -9,6 +9,9 @@ const app = express();
 const PORT = process.env.PORT || 3002;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '';
 
+// Trust proxy (Nginx is in front)
+app.set('trust proxy', 1);
+
 // Security middleware - Helmet
 app.use(helmet());
 

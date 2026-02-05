@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import pool from './config/database';
 
 const app = express();
@@ -12,6 +13,28 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Rate limiting middleware
+// General rate limit: 100 requests per 15 minutes
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: 'Too many requests from this IP, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Strict rate limit for POST requests: 10 requests per 15 minutes
+const postLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: 'Too many requests to create posts, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply general rate limit to all requests
+app.use(limiter);
 
 // Get all users
 app.get('/api/users', async (req, res) => {
@@ -38,7 +61,7 @@ app.get('/api/posts', async (req, res) => {
 });
 
 // Create a new post
-app.post('/api/posts', async (req, res) => {
+app.post('/api/posts', postLimiter, async (req, res) => {
   try {
     const { user_id, title, content } = req.body;
     

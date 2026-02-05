@@ -1,18 +1,27 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import pool from './config/database';
+import { createPostSchema, validateRequest } from './validation';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '';
 
+// Security middleware - Helmet
+app.use(helmet());
+
+// CORS configuration
 app.use(cors({
   origin: [CORS_ORIGIN],
   credentials: true,
+  optionsSuccessStatus: 200,
 }));
 
-app.use(express.json());
+// Body parser with size limit
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
 
 // Rate limiting middleware
 // General rate limit: 100 requests per 15 minutes
@@ -35,6 +44,16 @@ const postLimiter = rateLimit({
 
 // Apply general rate limit to all requests
 app.use(limiter);
+
+// Request logging
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(`${req.method} ${req.path} - ${res.statusCode} - ${duration}ms - ${req.ip}`);
+  });
+  next();
+});
 
 // Get all users
 app.get('/api/users', async (req, res) => {
@@ -61,13 +80,9 @@ app.get('/api/posts', async (req, res) => {
 });
 
 // Create a new post
-app.post('/api/posts', postLimiter, async (req, res) => {
+app.post('/api/posts', postLimiter, validateRequest(createPostSchema), async (req, res) => {
   try {
     const { user_id, title, content } = req.body;
-    
-    if (!user_id || !title || !content) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
 
     const [result] = await pool.execute(
       'INSERT INTO posts (user_id, title, content) VALUES (?, ?, ?)',

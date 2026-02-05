@@ -5,10 +5,10 @@ pipeline {
         stage('Log Credential') {
             steps {
                 withCredentials([
-                    usernamePassword(credentialsId:'github-login', usernameVariable:'USER-GIT', passwordVariable:'PASS-GIT'),
+                    usernamePassword(credentialsId:'github-login', usernameVariable:'USERGIT', passwordVariable:'PASSGIT'),
                     sshUserPrivateKey(credentialsId:'ssh-key', keyFileVariable:'KEY',usernameVariable:'USER')
                 ]){
-                    echo "${USER-GIT} - ${PASS-GIT} - ${KEY} - ${USER}"
+                    echo "${USERGIT} - ${PASSGIT} - ${KEY} - ${USER}"
                 }
             }
         }

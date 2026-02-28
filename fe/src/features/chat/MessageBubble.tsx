@@ -15,17 +15,26 @@ function isImageAttachment(url: string, name?: string | null): boolean {
   return /\.(jpe?g|png|gif|webp)$/i.test(u) || /\.(jpe?g|png|gif|webp)$/i.test(n);
 }
 
+function getAttachmentsList(message: ChatMessage): { name: string; url: string }[] {
+  if (Array.isArray(message.attachments) && message.attachments.length > 0) {
+    return message.attachments;
+  }
+  if (message.attachment_url) {
+    return [{ name: message.attachment_name ?? 'Tệp', url: message.attachment_url }];
+  }
+  return [];
+}
+
 export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBubbleProps) {
   const time = message.created_at
     ? new Date(message.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
     : '';
-  const fullAttachmentUrl = message.attachment_url ? getAttachmentFullUrl(message.attachment_url) : '';
-  const attachmentName = message.attachment_name || null;
+  const attachmentsList = getAttachmentsList(message);
 
-  const handleAttachmentClick = (e: React.MouseEvent) => {
-    if (onPreviewAttachment && message.attachment_url) {
+  const handleAttachmentClick = (e: React.MouseEvent, url: string, name: string | null) => {
+    if (onPreviewAttachment) {
       e.preventDefault();
-      onPreviewAttachment(message.attachment_url, attachmentName);
+      onPreviewAttachment(url, name);
     }
   };
 
@@ -41,37 +50,43 @@ export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBu
           {message.sender}
         </div>
       )}
-      {message.attachment_url && (
-        <div className="mb-1.5">
-          {isImageAttachment(message.attachment_url, message.attachment_name) ? (
-            <a
-              href={fullAttachmentUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={handleAttachmentClick}
-              className="inline-block cursor-pointer"
-            >
-              <img
-                src={fullAttachmentUrl}
-                alt={message.attachment_name || 'Ảnh'}
-                className="max-w-full max-h-[220px] rounded-md object-cover"
-              />
-            </a>
-          ) : (
-            <a
-              href={fullAttachmentUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={handleAttachmentClick}
-              className={cn(
-                'inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm border cursor-pointer',
-                isOwn ? 'bg-white/10 border-white/20 text-primary-foreground' : 'bg-muted border-border text-foreground'
-              )}
-            >
-              <span>📎</span>
-              <span>{message.attachment_name || 'Tệp đính kèm'}</span>
-            </a>
-          )}
+      {attachmentsList.length > 0 && (
+        <div className="mb-1.5 space-y-2">
+          {attachmentsList.map((att, i) => {
+            const fullUrl = getAttachmentFullUrl(att.url);
+            const isImage = isImageAttachment(att.url, att.name);
+            return isImage ? (
+              <a
+                key={i}
+                href={fullUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => handleAttachmentClick(e, att.url, att.name)}
+                className="inline-block cursor-pointer"
+              >
+                <img
+                  src={fullUrl}
+                  alt={att.name || 'Ảnh'}
+                  className="max-w-full max-h-[220px] rounded-md object-cover"
+                />
+              </a>
+            ) : (
+              <a
+                key={i}
+                href={fullUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => handleAttachmentClick(e, att.url, att.name)}
+                className={cn(
+                  'inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm border cursor-pointer',
+                  isOwn ? 'bg-white/10 border-white/20 text-primary-foreground' : 'bg-muted border-border text-foreground'
+                )}
+              >
+                <span>📎</span>
+                <span>{att.name || 'Tệp đính kèm'}</span>
+              </a>
+            );
+          })}
         </div>
       )}
       {message.content && <div className="whitespace-pre-wrap leading-snug">{message.content}</div>}

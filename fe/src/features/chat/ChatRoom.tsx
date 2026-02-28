@@ -69,12 +69,11 @@ export function ChatRoom({ joinValues, onLeave }: ChatRoomProps) {
   );
 
   const handleSend = useCallback(
-    (content: string, attachmentName?: string, attachmentUrl?: string) => {
+    (content: string, attachments?: { name: string; url: string }[]) => {
       const optMsg: ChatMessage & { _opt?: boolean } = {
         sender: joinValues.sender,
         content,
-        attachment_name: attachmentName,
-        attachment_url: attachmentUrl,
+        attachments: attachments ?? undefined,
         created_at: new Date().toISOString(),
         _opt: true,
       };
@@ -83,8 +82,7 @@ export function ChatRoom({ joinValues, onLeave }: ChatRoomProps) {
         room_code: roomCode,
         sender: joinValues.sender,
         content,
-        attachment_name: attachmentName,
-        attachment_url: attachmentUrl,
+        attachments,
       });
     },
     [sendMessage, roomCode, joinValues.sender]

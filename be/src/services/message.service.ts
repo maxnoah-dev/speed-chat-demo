@@ -15,5 +15,6 @@ export async function sendMessage(payload: SendMessagePayload): Promise<ChatMess
     content: payload.content || '',
     attachment_name: payload.attachment_name ?? null,
     attachment_url: payload.attachment_url ?? null,
+    attachments: payload.attachments?.length ? payload.attachments : null,
   });
 }

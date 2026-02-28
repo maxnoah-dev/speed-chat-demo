@@ -7,12 +7,10 @@
 npm install
 ```
 
-2. Copy `.env.example` to `.env` and update API URL if needed:
-```bash
-cp .env.example .env
-```
-
-Default API URL is `http://165.22.99.117:3002`. Update it if your backend runs on a different port or URL.
+2. Env theo NODE_ENV:
+   - **Local** (`npm start`): dùng `.env.development` — `REACT_APP_API_URL=http://localhost:3002`
+   - **Production build** (`npm run build`): dùng `.env.production` — sửa `REACT_APP_API_URL` cho domain thật
+   - Override: tạo `.env.local` (không commit)
 
 3. Run development server:
 ```bash

@@ -14,7 +14,7 @@ export interface PendingAttachment {
 }
 
 interface MessageInputProps {
-  onSend: (content: string, attachmentName?: string, attachmentUrl?: string) => void;
+  onSend: (content: string, attachments?: { name: string; url: string }[]) => void;
   disabled?: boolean;
 }
 
@@ -66,11 +66,11 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
     e.preventDefault();
     if (disabled) return;
     const hasContent = text.trim();
-    const hasAttachment = attachments.some((a) => a.url);
+    const list = attachments.filter((a) => a.url).map((a) => ({ name: a.name, url: a.url! }));
+    const hasAttachment = list.length > 0;
     if (!hasContent && !hasAttachment) return;
 
-    const firstOk = attachments.find((a) => a.url);
-    onSend(text.trim(), firstOk?.name, firstOk?.url);
+    onSend(text.trim(), list.length > 0 ? list : undefined);
     setText('');
     setAttachments([]);
   };

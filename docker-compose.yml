@@ -1,3 +1,6 @@
+# Base stack. Env lấy từ --env-file (dev hoặc prod).
+#   Prod: docker compose --env-file .env.production -f docker-compose.yml up -d
+#   Dev:  docker compose --env-file .env.development -f docker-compose.yml -f docker-compose.dev.yml up -d
 services:
   nginx:
     container_name: nginx-proxy
@@ -21,9 +24,9 @@ services:
     build:
       context: ./fe
       args:
-        - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost}
+        - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:3002}
     environment:
-      - VIRTUAL_HOST=social-demo.maxnoah.io.vn
+      - VIRTUAL_HOST=${VIRTUAL_HOST:-localhost}
       - VIRTUAL_PORT=80
     restart: unless-stopped
     healthcheck:
@@ -41,11 +44,13 @@ services:
     env_file:
       - ./be/.env
     environment:
+      - NODE_ENV=production
       - PORT=${BE_PORT:-3002}
       - DB_HOST=mysql
       - DB_USER=${DB_USER:-root}
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME:-social_demo}
-      - CORS_ORIGIN=${CORS_ORIGIN:-http://165.22.99.117}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3003}
     restart: unless-stopped
     depends_on:
       - mysql

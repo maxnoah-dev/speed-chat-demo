@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./src/config/env";
 import { defineConfig } from "prisma/config";
 
 // Ưu tiên MySQL từ DB_* nếu có; nếu không thì dùng DATABASE_URL

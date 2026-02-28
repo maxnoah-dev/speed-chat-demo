@@ -44,6 +44,7 @@ model ChatMessage {
   content         String   @db.Text
   attachment_name String?  @db.VarChar(255)
   attachment_url  String?  @db.VarChar(500)
+  attachments     Json?    // [{ name, url }, ...] — ưu tiên dùng khi gửi nhiều file
   created_at      DateTime @default(now())
   room            ChatRoom @relation(fields: [room_id], references: [id], onDelete: Cascade)
   @@map("chat_messages")

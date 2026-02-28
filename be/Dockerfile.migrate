@@ -1,0 +1,8 @@
+# Chỉ dùng để chạy prisma migrate deploy (trong docker-compose.infrastructure).
+FROM node:20-alpine
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY prisma.config.ts ./
+COPY prisma ./prisma
+RUN npm ci --omit=dev
+CMD ["sh", "-c", "export DB_PASSWORD=\"$MYSQL_ROOT_PASSWORD\" && npx prisma migrate deploy"]

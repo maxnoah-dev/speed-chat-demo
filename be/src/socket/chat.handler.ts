@@ -42,9 +42,10 @@ export function registerChatHandler(io: SocketIOServer): void {
 
     socket.on('send_message', async (payload: SendMessagePayload) => {
       const room_code = normalizeRoomCode(payload?.room_code);
-      const { sender, content, attachment_name, attachment_url } = payload ?? {};
+      const { sender, content, attachment_name, attachment_url, attachments } = payload ?? {};
+      const hasAttachments = (Array.isArray(attachments) && attachments.length > 0) || !!attachment_url;
       if (!room_code || !(sender ?? '').trim()) return;
-      if (!(content ?? '').trim() && !attachment_url) return;
+      if (!(content ?? '').trim() && !hasAttachments) return;
 
       console.log(`[chat] send_message room=${room_code} sender=${sender?.trim()} socketId=${socket.id}`);
 
@@ -55,6 +56,7 @@ export function registerChatHandler(io: SocketIOServer): void {
           content: (content ?? '').trim() || '',
           attachment_name,
           attachment_url,
+          attachments: Array.isArray(attachments) ? attachments : undefined,
         });
         const room = io.sockets.adapter.rooms.get(room_code);
         const size = room?.size ?? 0;

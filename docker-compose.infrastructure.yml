@@ -18,7 +18,24 @@ services:
     networks:
       - app-network
 
-  # Migration do backend đảm nhiệm: khi start chạy `prisma migrate deploy` (be/package.json script "start").
+  prisma-migrate:
+    build:
+      context: ./be
+      dockerfile: Dockerfile.migrate
+    container_name: prisma-migrate
+    env_file:
+      - .env.mysql
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_NAME: social_demo
+    command: sh -c "export DB_PASSWORD=$$MYSQL_ROOT_PASSWORD && npx prisma migrate deploy"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - app-network
 
 networks:
   app-network:

@@ -5,6 +5,11 @@ export interface ChatRoom {
   created_at?: string;
 }
 
+export interface ChatAttachment {
+  name: string;
+  url: string;
+}
+
 export interface ChatMessage {
   id?: string;
   room_id?: string;
@@ -12,6 +17,7 @@ export interface ChatMessage {
   content: string;
   attachment_name?: string | null;
   attachment_url?: string | null;
+  attachments?: ChatAttachment[] | null;
   created_at?: string;
 }
 
@@ -27,4 +33,6 @@ export interface SendMessagePayload {
   content: string;
   attachment_name?: string;
   attachment_url?: string;
+  /** Nhiều file — gửi cùng lúc */
+  attachments?: ChatAttachment[];
 }

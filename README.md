@@ -19,7 +19,7 @@ Mở docker, chạy trong CLI localhost hoặc chạy trong VPS để khởi t�
 docker run -d -p 3306:3306 --name social_demo -e MYSQL_ROOT_PASSWORD=EcmkSiw4ec6ZD0KtScZdpo8gxhpLdFNZnUxUiidKplR mysql
 ```
 
-Dùng Table Plus để mở cổng 3306 của host localhost hoặc IP của VPS, copy nội dung của `database.sql` vào trong Query trong Table Plus để tạo database và tables.
+Dùng Table Plus để mở cổng 3306 của host localhost, copy nội dung của `database.sql` vào trong Query trong Table Plus để tạo database và tables.
 
 
 Backend chạy tại: http://localhost:3002

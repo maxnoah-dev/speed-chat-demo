@@ -12,11 +12,11 @@ npm install
 cp .env.example .env
 ```
 
-Default API URL is `http://localhost:3002`. Update it if your backend runs on a different port or URL.
+Default API URL is `http://165.22.99.117:3002`. Update it if your backend runs on a different port or URL.
 
 3. Run development server:
 ```bash
 npm start
 ```
 
-The app will open at http://localhost:3003
+The app will open at http://165.22.99.117:3003

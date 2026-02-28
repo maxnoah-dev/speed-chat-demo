@@ -3,23 +3,23 @@ services:
     container_name: nginx-proxy
     image: nginx:alpine
     ports:
-      - 3002:80
+      - 80:80
+      - 443:443
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - be-nodejs
+      - fe-react
     restart: unless-stopped
     networks:
       - app-network
 
   fe-react:
     container_name: fe-react
-    ports:
-      - 3003:80
     build:
       context: ./fe
       args:
-        - REACT_APP_API_URL=${REACT_APP_API_URL:-http://188.166.234.37:3002}
+        - REACT_APP_API_URL=${REACT_APP_API_URL:-}
     restart: unless-stopped
     networks:
       - app-network
@@ -33,7 +33,7 @@ services:
       - PORT=${BE_PORT:-3002}
       - DB_USER=${DB_USER:-root}
       - DB_NAME=${DB_NAME:-social_demo}
-      - CORS_ORIGIN=${CORS_ORIGIN:-http://188.166.234.37:3003}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://165.22.99.117}
     restart: unless-stopped
     networks:
       - app-network

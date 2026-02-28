@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment{
-        SSH_IP = '188.166.234.37'
+        SSH_IP = '165.22.99.117'
         DEPLOY_PATH = '/root/social-full-demo'
         DEPLOYMENT_GITHUB_BRANCH = 'fe-nginx-demo'
     }

@@ -41,8 +41,7 @@ services:
   be-nodejs:
     container_name: be-nodejs
     build: ./be
-    env_file:
-      - ./be/.env
+    # env_file: bỏ, chỉ dùng biến môi trường từ --env-file
     environment:
       - NODE_ENV=production
       - PORT=${BE_PORT:-3002}
@@ -51,6 +50,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME:-social_demo}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3003}
+      - DATABASE_URL=${DATABASE_URL}
     restart: unless-stopped
     depends_on:
       - mysql

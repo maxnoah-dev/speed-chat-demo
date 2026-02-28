@@ -7,9 +7,11 @@
 npm install
 ```
 
-2. Copy `.env.example` to `.env` and update database credentials:
+2. Copy `.env.example` thành `.env.development` hoặc `.env.production` và cập nhật thông tin database:
 ```bash
-cp .env.example .env
+cp .env.example .env.development
+# hoặc
+cp .env.example .env.production
 ```
 
 3. Make sure MySQL is running and database is created (run `database.sql` from root)

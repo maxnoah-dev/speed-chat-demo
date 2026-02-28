@@ -40,20 +40,27 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
       const list = Array.from(files).map((file) => ({ file, name: file.name, uploading: true }));
       setAttachments((prev) => [...prev, ...list]);
 
-      for (let i = 0; i < list.length; i++) {
-        const result = await uploadOne(list[i].file);
-        setAttachments((prev) => {
-          const next = [...prev];
-          const idx = next.findIndex((a) => a.file === list[i].file);
-          if (idx === -1) return prev;
+      // Upload song song tất cả file
+      const uploadResults = await Promise.all(
+        list.map(async (item) => {
+          const result = await uploadOne(item.file);
+          return { item, result };
+        })
+      );
+
+      setAttachments((prev) => {
+        let next = [...prev];
+        uploadResults.forEach(({ item, result }) => {
+          const idx = next.findIndex((a) => a.file === item.file);
+          if (idx === -1) return;
           if (result) {
             next[idx] = { ...next[idx], url: result.url, name: result.name, uploading: false };
           } else {
             next[idx] = { ...next[idx], error: 'Tải lên thất bại', uploading: false };
           }
-          return next;
         });
-      }
+        return next;
+      });
     },
     [uploadOne]
   );

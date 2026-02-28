@@ -36,6 +36,9 @@
     ]
   },
   "devDependencies": {
-    "@types/socket.io-client": "^1.4.36"
+    "@types/socket.io-client": "^1.4.36",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.2.1"
   }
 }

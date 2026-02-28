@@ -5,7 +5,7 @@ services:
     container_name: mysql
     restart: unless-stopped
     env_file:
-      - ./be/.env
+      - .env.mysql
     ports:
       - 3306:3306
     volumes:

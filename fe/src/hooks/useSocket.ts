@@ -40,6 +40,7 @@ export function useSocket(
       socket.disconnect();
       socketRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- payload is object ref; we depend on its fields above
   }, [joined, payload?.room_code, payload?.room_name, payload?.sender, onRoomHistory, onNewMessage, onUserJoined]);
 
   const sendMessage = useCallback((data: SendMessagePayload) => {

@@ -1,6 +1,9 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { uploadFile } from '../../services/api';
-import styles from './MessageInput.module.css';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { cn } from '../../lib/utils';
+import { Paperclip, X } from 'lucide-react';
 
 export interface PendingAttachment {
   file: File;
@@ -87,62 +90,66 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
 
   return (
     <div
-      className={`${styles.wrapper} ${dragOver ? styles.dragOver : ''}`}
+      className={cn(
+        'border-t border-border bg-card p-3',
+        dragOver && 'bg-muted outline outline-2 outline-dashed outline-border'
+      )}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
     >
       {attachments.length > 0 && (
-        <div className={styles.attachments}>
+        <div className="flex flex-wrap gap-2 mb-2.5">
           {attachments.map((a, i) => (
-            <div key={i} className={styles.attItem}>
-              <span className={styles.attName}>
+            <div
+              key={i}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-muted border border-border text-muted-foreground text-xs"
+            >
+              <span className="max-w-[140px] truncate">
                 {a.uploading ? 'Đang tải...' : a.error || a.name}
               </span>
               <button
                 type="button"
-                className={styles.attRemove}
+                className="p-0.5 rounded hover:text-destructive hover:bg-destructive/10 transition-colors"
                 onClick={() => removeAttachment(i)}
                 aria-label="Xóa"
               >
-                ×
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
           ))}
         </div>
       )}
-      <form className={styles.form} onSubmit={handleSubmit}>
+      <form className="flex items-center gap-2" onSubmit={handleSubmit}>
         <input
           type="file"
           ref={fileInputRef}
-          className={styles.hiddenInput}
+          className="sr-only"
           multiple
           onChange={(e) => {
             addFiles(e.target.files);
             e.target.value = '';
           }}
         />
-        <button
+        <Button
           type="button"
-          className={styles.attachBtn}
+          variant="outline"
+          size="icon"
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled}
           title="Đính kèm tệp"
           aria-label="Đính kèm tệp"
         >
-          📎
-        </button>
-        <input
-          type="text"
-          className={styles.input}
+          <Paperclip className="h-4 w-4" />
+        </Button>
+        <Input
           placeholder="Nhập tin nhắn..."
           value={text}
           onChange={(e) => setText(e.target.value)}
           disabled={disabled}
+          className="flex-1 min-w-0"
         />
-        <button type="submit" className={styles.sendBtn} disabled={disabled}>
-          Gửi
-        </button>
+        <Button type="submit" disabled={disabled}>Gửi</Button>
       </form>
     </div>
   );

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { generateRoomCode } from '../../services/api';
-import styles from './JoinForm.module.css';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 
 export interface JoinFormValues {
   sender: string;
@@ -30,9 +32,9 @@ export function JoinForm({ onSubmit }: JoinFormProps) {
       const code = await generateRoomCode();
       setRoomCode(code);
       setRoomName(`Phòng ${code}`);
-      setLoading(false);
     } catch {
       setError('Không thể tạo mã phòng. Thử lại.');
+    } finally {
       setLoading(false);
     }
   };
@@ -56,51 +58,40 @@ export function JoinForm({ onSubmit }: JoinFormProps) {
   };
 
   return (
-    <div className={styles.wrapper}>
-      <header className={styles.header}>
-        <h1>Chat nhóm</h1>
-        <p>Chỉ cần nhập tên và mã phòng — không cần đăng nhập</p>
-      </header>
-
-      <form className={styles.form} onSubmit={handleJoin}>
-        <input
-          type="text"
-          placeholder="Tên của bạn *"
-          value={sender}
-          onChange={(e) => setSender(e.target.value)}
-          className={styles.input}
-          maxLength={100}
-        />
-        <div className={styles.row}>
-          <input
-            type="text"
-            placeholder="Mã phòng (để tham gia)"
-            value={roomCode}
-            onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-            className={styles.input}
-            readOnly={loading}
+    <Card className="w-full max-w-[400px] mx-auto border-border">
+      <CardHeader className="text-center space-y-1.5">
+        <CardTitle className="text-xl">Chat nhóm</CardTitle>
+        <CardDescription>Chỉ cần nhập tên và mã phòng — không cần đăng nhập</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form className="flex flex-col gap-4" onSubmit={handleJoin}>
+          <Input
+            placeholder="Tên của bạn *"
+            value={sender}
+            onChange={(e) => setSender(e.target.value)}
+            maxLength={100}
           />
-          <button
-            type="button"
-            className={styles.btnSecondary}
-            onClick={handleCreateNew}
-            disabled={loading}
-          >
-            {loading ? 'Đang tạo...' : 'Tạo phòng mới'}
-          </button>
-        </div>
-        <input
-          type="text"
-          placeholder="Tên phòng (hiển thị, tùy chọn)"
-          value={roomName}
-          onChange={(e) => setRoomName(e.target.value)}
-          className={styles.input}
-        />
-        {error && <div className={styles.error}>{error}</div>}
-        <button type="submit" className={styles.btnPrimary}>
-          Vào phòng chat
-        </button>
-      </form>
-    </div>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Mã phòng (để tham gia)"
+              value={roomCode}
+              onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+              readOnly={loading}
+              className="flex-1 min-w-0"
+            />
+            <Button type="button" variant="secondary" onClick={handleCreateNew} disabled={loading}>
+              {loading ? 'Đang tạo...' : 'Tạo phòng mới'}
+            </Button>
+          </div>
+          <Input
+            placeholder="Tên phòng (hiển thị, tùy chọn)"
+            value={roomName}
+            onChange={(e) => setRoomName(e.target.value)}
+          />
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <Button type="submit" className="w-full">Vào phòng chat</Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { JoinForm, ChatRoom } from './features/chat';
 import type { JoinFormValues } from './features/chat';
-import './App.css';
 
 function App() {
   const [joined, setJoined] = useState(false);
@@ -19,14 +18,14 @@ function App() {
 
   if (!joined || !joinValues) {
     return (
-      <div className="app">
+      <div className="min-h-screen bg-background py-8 px-4 md:py-12 md:px-6">
         <JoinForm onSubmit={handleJoin} />
       </div>
     );
   }
 
   return (
-    <div className="app">
+    <div className="min-h-screen bg-background py-8 px-4 md:py-12 md:px-6">
       <ChatRoom joinValues={joinValues} onLeave={handleLeave} />
     </div>
   );

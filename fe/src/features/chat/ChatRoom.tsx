@@ -4,7 +4,8 @@ import type { ChatMessage } from '../../types/chat';
 import type { JoinFormValues } from './JoinForm';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
-import styles from './ChatRoom.module.css';
+import { Button } from '../../components/ui/button';
+import { Card } from '../../components/ui/card';
 
 interface ChatRoomProps {
   joinValues: JoinFormValues;
@@ -21,14 +22,18 @@ export function ChatRoom({ joinValues, onLeave }: ChatRoomProps) {
     sender: joinValues.sender,
   };
 
-  const { sendMessage } = useSocket(joinValues.room_code && joinValues.sender ? true : false, payload, {
-    onRoomHistory: useCallback((msgs: ChatMessage[]) => setMessages(msgs), []),
-    onNewMessage: useCallback((msg: ChatMessage) => setMessages((prev) => [...prev, msg]), []),
-    onUserJoined: useCallback(({ sender }: { sender: string }) => {
-      setInfo(`${sender} đã tham gia phòng`);
-      setTimeout(() => setInfo(''), 2500);
-    }, []),
-  });
+  const { sendMessage } = useSocket(
+    !!(joinValues.room_code && joinValues.sender),
+    payload,
+    {
+      onRoomHistory: useCallback((msgs: ChatMessage[]) => setMessages(msgs), []),
+      onNewMessage: useCallback((msg: ChatMessage) => setMessages((prev) => [...prev, msg]), []),
+      onUserJoined: useCallback(({ sender }: { sender: string }) => {
+        setInfo(`${sender} đã tham gia phòng`);
+        setTimeout(() => setInfo(''), 2500);
+      }, []),
+    }
+  );
 
   const handleSend = useCallback(
     (content: string, attachmentName?: string, attachmentUrl?: string) => {
@@ -44,25 +49,33 @@ export function ChatRoom({ joinValues, onLeave }: ChatRoomProps) {
   );
 
   return (
-    <div className={styles.room}>
-      <header className={styles.header}>
-        <div className={styles.headerInfo}>
-          <h1 className={styles.roomTitle}>{joinValues.room_name || joinValues.room_code}</h1>
-          <p className={styles.roomMeta}>
-            Mã phòng: <strong>{joinValues.room_code}</strong> · Bạn: <strong>{joinValues.sender}</strong>
+    <Card className="flex flex-col w-full max-w-[520px] mx-auto overflow-hidden h-[calc(100vh-4rem)] min-h-[480px] border-border">
+      <header className="flex items-center justify-between gap-3 p-4 border-b border-border bg-card">
+        <div className="min-w-0 flex-1">
+          <h1 className="font-semibold text-foreground truncate">
+            {joinValues.room_name || joinValues.room_code}
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            Mã phòng: <strong className="text-foreground">{joinValues.room_code}</strong>
+            {' · '}
+            Bạn: <strong className="text-foreground">{joinValues.sender}</strong>
           </p>
         </div>
-        <button type="button" className={styles.leaveBtn} onClick={onLeave}>
+        <Button type="button" variant="outline" size="sm" onClick={onLeave} className="shrink-0">
           Thoát phòng
-        </button>
+        </Button>
       </header>
 
-      {info && <div className={styles.infoBar}>{info}</div>}
+      {info && (
+        <div className="px-4 py-2 text-center text-sm bg-muted text-muted-foreground border-b border-border">
+          {info}
+        </div>
+      )}
 
-      <div className={styles.chatArea}>
+      <div className="flex flex-1 flex-col min-h-0 bg-muted/30">
         <MessageList messages={messages} currentSender={joinValues.sender} />
         <MessageInput onSend={handleSend} />
       </div>
-    </div>
+    </Card>
   );
 }

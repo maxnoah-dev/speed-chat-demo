@@ -1,4 +1,5 @@
 import * as roomRepo from '../repositories/room.repository';
+import type { ChatRoom } from '../types/chat';
 
 const CODE_LENGTH = 8;
 const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -11,6 +12,10 @@ export function generateRoomCode(): string {
   return code;
 }
 
-export async function getOrCreateRoomId(roomCode: string, roomName?: string): Promise<number> {
+export async function getOrCreateRoomId(roomCode: string, roomName?: string): Promise<string> {
   return roomRepo.getOrCreateRoomId(roomCode, roomName);
+}
+
+export async function findRoomByCode(code: string): Promise<ChatRoom | null> {
+  return roomRepo.findRoomByCode(code);
 }

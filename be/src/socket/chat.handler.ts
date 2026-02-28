@@ -1,6 +1,5 @@
 import { Server as SocketIOServer } from 'socket.io';
 import * as roomService from '../services/room.service';
-import * as roomRepo from '../repositories/room.repository';
 import * as messageService from '../services/message.service';
 import type { JoinRoomPayload, SendMessagePayload } from '../types/chat';
 
@@ -25,7 +24,7 @@ export function registerChatHandler(io: SocketIOServer): void {
         await roomService.getOrCreateRoomId(room_code, room_name);
         socket.join(room_code);
 
-        const room = await roomRepo.findRoomByCode(room_code);
+        const room = await roomService.findRoomByCode(room_code);
         const room_name_from_db = room?.name ?? room_code;
         socket.emit('room_info', { room_code, room_name: room_name_from_db });
 

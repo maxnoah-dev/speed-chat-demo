@@ -9,8 +9,16 @@ services:
       - 3306:3306
     volumes:
       - ./database.sql:/docker-entrypoint-initdb.d/database.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p\"$$MYSQL_ROOT_PASSWORD\" || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - app-network
+
+  # Migration do backend đảm nhiệm: khi start chạy `prisma migrate deploy` (be/package.json script "start").
 
 networks:
   app-network:

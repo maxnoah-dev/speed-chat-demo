@@ -1,13 +1,13 @@
 export interface ChatRoom {
-  id: number;
+  id: string;
   code: string;
   name: string;
   created_at?: string;
 }
 
 export interface ChatMessage {
-  id?: number;
-  room_id?: number;
+  id?: string;
+  room_id?: string;
   sender: string;
   content: string;
   attachment_name?: string | null;

@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import pool from '../config/database';
+import * as userService from '../services/user.service';
 
 const router = Router();
 
 router.get('/', async (_req, res) => {
   try {
-    const [rows] = await pool.execute('SELECT * FROM users ORDER BY created_at DESC');
+    const rows = await userService.getUsers();
     res.json(rows);
   } catch (error) {
     console.error('Error fetching users:', error);

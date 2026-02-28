@@ -6,6 +6,7 @@ import { cn } from '../../lib/utils';
 interface MessageBubbleProps {
   message: ChatMessage;
   isOwn: boolean;
+  onPreviewAttachment?: (url: string, name: string | null) => void;
 }
 
 function isImageAttachment(url: string, name?: string | null): boolean {
@@ -14,11 +15,19 @@ function isImageAttachment(url: string, name?: string | null): boolean {
   return /\.(jpe?g|png|gif|webp)$/i.test(u) || /\.(jpe?g|png|gif|webp)$/i.test(n);
 }
 
-export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
+export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBubbleProps) {
   const time = message.created_at
     ? new Date(message.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
     : '';
   const fullAttachmentUrl = message.attachment_url ? getAttachmentFullUrl(message.attachment_url) : '';
+  const attachmentName = message.attachment_name || null;
+
+  const handleAttachmentClick = (e: React.MouseEvent) => {
+    if (onPreviewAttachment && message.attachment_url) {
+      e.preventDefault();
+      onPreviewAttachment(message.attachment_url, attachmentName);
+    }
+  };
 
   return (
     <div
@@ -35,7 +44,13 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
       {message.attachment_url && (
         <div className="mb-1.5">
           {isImageAttachment(message.attachment_url, message.attachment_name) ? (
-            <a href={fullAttachmentUrl} target="_blank" rel="noopener noreferrer" className="inline-block">
+            <a
+              href={fullAttachmentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleAttachmentClick}
+              className="inline-block cursor-pointer"
+            >
               <img
                 src={fullAttachmentUrl}
                 alt={message.attachment_name || 'Ảnh'}
@@ -47,8 +62,9 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
               href={fullAttachmentUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={handleAttachmentClick}
               className={cn(
-                'inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm border',
+                'inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm border cursor-pointer',
                 isOwn ? 'bg-white/10 border-white/20 text-primary-foreground' : 'bg-muted border-border text-foreground'
               )}
             >

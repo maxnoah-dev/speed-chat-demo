@@ -4,11 +4,8 @@ services:
     image: mysql:8.0
     container_name: mysql
     restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: EcmkSiw4ec6ZD0KtScZdpo8gxhpLdFNZnUxUiidKplR
-      MYSQL_DATABASE: social_demo
-      MYSQL_USER: root
-      MYSQL_PASSWORD: EcmkSiw4ec6ZD0KtScZdpo8gxhpLdFNZnUxUiidKplR
+    env_file:
+      - ./be/.env
     ports:
       - 3306:3306
     volumes:

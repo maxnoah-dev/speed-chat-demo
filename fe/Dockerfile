@@ -15,7 +15,6 @@ ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 RUN yarn build
 
-FROM nginx
+FROM nginx:alpine
 COPY --from=build-react /fe/build /usr/share/nginx/html
-
 EXPOSE 80

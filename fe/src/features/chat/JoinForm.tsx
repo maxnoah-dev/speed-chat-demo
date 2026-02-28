@@ -17,7 +17,6 @@ interface JoinFormProps {
 export function JoinForm({ onSubmit }: JoinFormProps) {
   const [sender, setSender] = useState('');
   const [roomCode, setRoomCode] = useState('');
-  const [roomName, setRoomName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -31,7 +30,11 @@ export function JoinForm({ onSubmit }: JoinFormProps) {
     try {
       const code = await generateRoomCode();
       setRoomCode(code);
-      setRoomName(`Phòng ${code}`);
+      onSubmit({
+        sender: sender.trim(),
+        room_code: code,
+        room_name: `Phòng ${code}`,
+      });
     } catch {
       setError('Không thể tạo mã phòng. Thử lại.');
     } finally {
@@ -53,7 +56,7 @@ export function JoinForm({ onSubmit }: JoinFormProps) {
     onSubmit({
       sender: sender.trim(),
       room_code: roomCode.trim(),
-      room_name: roomName.trim() || roomCode.trim(),
+      room_name: '',
     });
   };
 
@@ -83,11 +86,6 @@ export function JoinForm({ onSubmit }: JoinFormProps) {
               {loading ? 'Đang tạo...' : 'Tạo phòng mới'}
             </Button>
           </div>
-          <Input
-            placeholder="Tên phòng (hiển thị, tùy chọn)"
-            value={roomName}
-            onChange={(e) => setRoomName(e.target.value)}
-          />
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" className="w-full">Vào phòng chat</Button>
         </form>

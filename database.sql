@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     room_id INT NOT NULL,
     sender VARCHAR(100) NOT NULL,
-    content TEXT NOT NULL DEFAULT '',
+    content TEXT NOT NULL,
     attachment_name VARCHAR(255) NULL,
     attachment_url VARCHAR(500) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

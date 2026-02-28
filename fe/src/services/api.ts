@@ -1,4 +1,5 @@
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
+const API_URL =
+  (process.env.REACT_APP_API_URL || 'http://localhost:3002').replace(/[\s;]+$/, '').trim() || 'http://localhost:3002';
 
 export async function generateRoomCode(): Promise<string> {
   const res = await fetch(`${API_URL}/api/chat/generate-code`);

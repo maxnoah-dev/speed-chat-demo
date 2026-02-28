@@ -7,6 +7,11 @@ import { MessageInput } from './MessageInput';
 import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
 
+/** Chuẩn hóa mã phòng giống backend: trim + uppercase */
+function normalizeRoomCode(code: string): string {
+  return (code ?? '').trim().toUpperCase();
+}
+
 interface ChatRoomProps {
   joinValues: JoinFormValues;
   onLeave: () => void;
@@ -15,37 +20,74 @@ interface ChatRoomProps {
 export function ChatRoom({ joinValues, onLeave }: ChatRoomProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [info, setInfo] = useState('');
+  /** Tên phòng từ server (đồng bộ cho mọi user trong phòng) */
+  const [serverRoomName, setServerRoomName] = useState<string | null>(null);
 
+  const roomCode = normalizeRoomCode(String(joinValues.room_code ?? ''));
   const payload = {
-    room_code: joinValues.room_code,
+    room_code: roomCode,
     room_name: joinValues.room_name,
     sender: joinValues.sender,
   };
 
-  const { sendMessage } = useSocket(
-    !!(joinValues.room_code && joinValues.sender),
+  const onNewMessageCb = useCallback((msg: ChatMessage) => {
+    setMessages((prev) => {
+      const optimisticIdx = prev.findIndex(
+        (m) => (m as ChatMessage & { _opt?: boolean })._opt && m.sender === msg.sender && m.content === msg.content
+      );
+      if (optimisticIdx >= 0) {
+        const next = [...prev];
+        next[optimisticIdx] = msg;
+        return next;
+      }
+      return [...prev, msg];
+    });
+  }, []);
+
+  const { sendMessage, isConnected } = useSocket(
+    !!(roomCode && joinValues.sender),
     payload,
     {
       onRoomHistory: useCallback((msgs: ChatMessage[]) => setMessages(msgs), []),
-      onNewMessage: useCallback((msg: ChatMessage) => setMessages((prev) => [...prev, msg]), []),
+      onNewMessage: onNewMessageCb,
       onUserJoined: useCallback(({ sender }: { sender: string }) => {
         setInfo(`${sender} đã tham gia phòng`);
         setTimeout(() => setInfo(''), 2500);
+      }, []),
+      onRoomInfo: useCallback(({ room_name }: { room_code: string; room_name: string }) => {
+        setServerRoomName(room_name);
+      }, []),
+      onRoomError: useCallback(({ error }: { error: string }) => {
+        setInfo(`Lỗi phòng: ${error}`);
+        setTimeout(() => setInfo(''), 10000);
+      }, []),
+      onSendMessageError: useCallback(({ error }: { error: string }) => {
+        setInfo(`Gửi tin nhắn thất bại: ${error}`);
+        setTimeout(() => setInfo(''), 10000);
       }, []),
     }
   );
 
   const handleSend = useCallback(
     (content: string, attachmentName?: string, attachmentUrl?: string) => {
+      const optMsg: ChatMessage & { _opt?: boolean } = {
+        sender: joinValues.sender,
+        content,
+        attachment_name: attachmentName,
+        attachment_url: attachmentUrl,
+        created_at: new Date().toISOString(),
+        _opt: true,
+      };
+      setMessages((prev) => [...prev, optMsg]);
       sendMessage({
-        room_code: joinValues.room_code,
+        room_code: roomCode,
         sender: joinValues.sender,
         content,
         attachment_name: attachmentName,
         attachment_url: attachmentUrl,
       });
     },
-    [sendMessage, joinValues.room_code, joinValues.sender]
+    [sendMessage, roomCode, joinValues.sender]
   );
 
   return (
@@ -53,12 +95,20 @@ export function ChatRoom({ joinValues, onLeave }: ChatRoomProps) {
       <header className="flex items-center justify-between gap-3 p-4 border-b border-border bg-card">
         <div className="min-w-0 flex-1">
           <h1 className="font-semibold text-foreground truncate">
-            {joinValues.room_name || joinValues.room_code}
+            {serverRoomName ?? (joinValues.room_name || roomCode)}
           </h1>
           <p className="text-xs text-muted-foreground">
-            Mã phòng: <strong className="text-foreground">{joinValues.room_code}</strong>
+            Mã phòng: <strong className="text-foreground">{roomCode}</strong>
             {' · '}
             Bạn: <strong className="text-foreground">{joinValues.sender}</strong>
+            {typeof isConnected === 'boolean' && (
+              <>
+                {' · '}
+                <span className={isConnected ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}>
+                  {isConnected ? 'Đã kết nối' : 'Đang kết nối...'}
+                </span>
+              </>
+            )}
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={onLeave} className="shrink-0">

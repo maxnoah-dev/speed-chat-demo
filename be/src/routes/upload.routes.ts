@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, RequestHandler } from 'express';
 import multer from 'multer';
 import path from 'path';
 import {
@@ -33,7 +33,7 @@ const upload = multer({
 
 const router = Router();
 
-router.post('/', upload.single('file'), (req: Request, res: Response) => {
+router.post('/', upload.single('file') as unknown as RequestHandler, (req: Request, res: Response) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Không có tệp được gửi' });
   }

@@ -15,6 +15,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   cors: { origin: '*', methods: ['GET', 'POST'] },
+  connectionStateRecovery: {}, // Socket.io 4.6+: khôi phục room & tin nhắn sau reconnect
 });
 
 const PORT = process.env.PORT || 3002;

@@ -16,6 +16,10 @@ COPY . .
 
 RUN yarn build
 
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 EXPOSE 3002
 
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["yarn", "start"]

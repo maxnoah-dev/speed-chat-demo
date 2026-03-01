@@ -10,5 +10,20 @@ if [ -z "$DATABASE_URL" ] && [ -n "$DB_HOST" ]; then
     console.log('mysql://' + u + ':' + encodeURIComponent(p) + '@' + h + ':3306/' + d);
   ")
 fi
-# Chạy lệnh (thường là: yarn start = prisma migrate deploy && node dist/index.js)
-exec "$@"
+# Nếu lệnh là yarn start: retry prisma migrate (MySQL có thể chưa sẵn sàng ngay)
+case "$*" in
+  *yarn*start*)
+    for i in 1 2 3 4 5; do
+      if /usr/local/bin/npx prisma migrate deploy; then
+        exec node dist/index.js
+      fi
+      echo "Prisma migrate attempt $i failed, retrying in 5s..."
+      sleep 5
+    done
+    echo "Prisma migrate deploy failed after 5 attempts."
+    exit 1
+    ;;
+  *)
+    exec "$@"
+    ;;
+esac

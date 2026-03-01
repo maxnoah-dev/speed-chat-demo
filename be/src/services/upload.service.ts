@@ -1,21 +1,31 @@
 import path from 'path';
 import fs from 'fs';
+import mimeTypes from 'mime-types';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (ảnh, tài liệu, v.v.)
-// Video dưới 1 phút: giới hạn ~50MB (ước lượng 1 phút video)
-const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
-const ALLOWED_MIMES = new Set([
-  'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-  'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'text/plain', 'application/zip',
-  // Video (dưới 1 phút)
-  'video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska',
-  // Âm thanh tin nhắn
-  'audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/wav', 'audio/webm', 'audio/mp4', 'audio/aac',
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB (tài liệu, ảnh, ...)
+// Video dưới 5 phút: ~300MB (ước lượng 5 phút video)
+const MAX_VIDEO_SIZE = 300 * 1024 * 1024;
+
+/** Đuôi file được phép (dùng thư viện mime-types để nhận diện). */
+const ALLOWED_EXTENSIONS = new Set([
+  // Ảnh
+  '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg', '.ico', '.heic',
+  // Video (dưới 5 phút)
+  '.mp4', '.webm', '.mov', '.avi', '.mkv', '.m4v', '.ogv',
+  // Âm thanh
+  '.mp3', '.ogg', '.wav', '.m4a', '.aac', '.flac', '.webm',
+  // Tài liệu Office & phổ biến
+  '.pdf',
+  '.doc', '.docx', '.odt', '.rtf',
+  '.xls', '.xlsx', '.ods', '.csv',
+  '.ppt', '.pptx', '.odp',
+  '.txt', '.text', '.md', '.json', '.xml',
+  '.zip', '.rar', '.7z', '.tar', '.gz',
 ]);
-const VIDEO_MIMES = new Set([
-  'video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska',
+
+const VIDEO_EXTENSIONS = new Set([
+  '.mp4', '.webm', '.mov', '.avi', '.mkv', '.m4v', '.ogv',
 ]);
 
 export function ensureUploadDir(): void {
@@ -32,22 +42,38 @@ export function getMaxFileSize(): number {
   return MAX_FILE_SIZE;
 }
 
-/** Giới hạn dung lượng cho video (dưới 1 phút). */
+/** Giới hạn dung lượng cho video (dưới 5 phút). */
 export function getMaxVideoSize(): number {
   return MAX_VIDEO_SIZE;
 }
 
-export function isAllowedMime(mimetype: string): boolean {
-  return ALLOWED_MIMES.has(mimetype);
+function getExtension(filename: string): string {
+  const ext = path.extname(filename || '').toLowerCase();
+  return ext || '';
 }
 
-export function isVideoMime(mimetype: string): boolean {
-  return VIDEO_MIMES.has(mimetype);
+/** Cho phép theo đuôi file (dùng allowlist, không phụ thuộc mimetype từ client). */
+export function isAllowedByExtension(filename: string): boolean {
+  const ext = getExtension(filename);
+  return ALLOWED_EXTENSIONS.has(ext);
 }
 
-/** Trả về giới hạn size theo mimetype: video dùng MAX_VIDEO_SIZE, còn lại dùng MAX_FILE_SIZE. */
-export function getMaxSizeForMime(mimetype: string): number {
-  return isVideoMime(mimetype) ? MAX_VIDEO_SIZE : MAX_FILE_SIZE;
+/** Có phải video theo đuôi file. */
+export function isVideoByExtension(filename: string): boolean {
+  const ext = getExtension(filename);
+  return VIDEO_EXTENSIONS.has(ext);
+}
+
+/** Trả về MIME chuẩn từ đuôi file (dùng thư viện mime-types). */
+export function getMimeFromExtension(filename: string): string | false {
+  const ext = getExtension(filename);
+  if (!ext) return false;
+  return mimeTypes.lookup(ext) as string | false;
+}
+
+/** Giới hạn size theo đuôi file: video dùng MAX_VIDEO_SIZE, còn lại MAX_FILE_SIZE. */
+export function getMaxSizeForFilename(filename: string): number {
+  return isVideoByExtension(filename) ? MAX_VIDEO_SIZE : MAX_FILE_SIZE;
 }
 
 /** Returns public URL path for stored file (e.g. /uploads/filename) */

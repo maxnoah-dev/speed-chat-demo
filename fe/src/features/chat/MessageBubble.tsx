@@ -54,22 +54,33 @@ export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBu
   const hasImageOrVideo = attachmentsList.some(
     (a) => isImageAttachment(a.url, a.name) || isVideoAttachment(a.url, a.name)
   );
+  /** Tin nhắn chỉ có ảnh/GIF/video: hiển thị như Messenger, không nền/border màu bọc quanh */
+  const isBareMedia = hasMediaOnly && hasImageOrVideo;
+  /** Tin nhắn chỉ có file (Excel, PDF...): không nền màu, chỉ link gọn */
+  const isBareFileOnly = hasMediaOnly && !hasImageOrVideo;
 
   return (
     <div
       className={cn(
-        'max-w-[78%] rounded-2xl text-sm break-words transition-smooth overflow-hidden',
-        isOwn ? 'ml-auto bg-primary text-primary-foreground shadow-md' : 'bg-card border border-border shadow-sm rounded-tl-md',
-        hasMediaOnly && hasImageOrVideo ? 'p-0' : 'px-4 py-2.5'
+        'max-w-[78%] text-sm break-words transition-smooth',
+        isOwn && 'ml-auto',
+        // Không dùng bubble màu khi chỉ gửi ảnh/video/file
+        isBareMedia && 'rounded-2xl overflow-hidden shadow-sm',
+        isBareFileOnly && 'rounded-xl',
+        !isBareMedia && !isBareFileOnly && 'rounded-2xl overflow-hidden',
+        !isBareMedia && !isBareFileOnly && (isOwn ? 'bg-primary text-primary-foreground shadow-md' : 'bg-card border border-border shadow-sm rounded-tl-md'),
+        isBareMedia && 'p-0',
+        isBareFileOnly && 'py-1',
+        !isBareMedia && !isBareFileOnly && 'px-4 py-2.5'
       )}
     >
       {!isOwn && (
-        <div className={cn('font-medium text-muted-foreground uppercase tracking-wider mb-1 text-[11px]', hasMediaOnly && hasImageOrVideo ? 'px-4 pt-2' : '')}>
+        <div className={cn('font-medium text-muted-foreground uppercase tracking-wider text-[11px]', isBareMedia ? 'px-1 pb-0.5' : isBareFileOnly ? 'mb-1' : 'mb-1')}>
           {message.sender}
         </div>
       )}
       {attachmentsList.length > 0 && (
-        <div className={cn('space-y-1', !(hasMediaOnly && hasImageOrVideo) && 'mb-1.5', hasMediaOnly && hasImageOrVideo ? 'px-0' : '')}>
+        <div className={cn('space-y-1', !isBareMedia && !isBareFileOnly && 'mb-1.5')}>
           {attachmentsList.map((att, i) => {
             const fullUrl = getAttachmentFullUrl(att.url);
             const isImage = isImageAttachment(att.url, att.name);
@@ -83,19 +94,19 @@ export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBu
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => handleAttachmentClick(e, att.url, att.name)}
-                  className="block w-full cursor-pointer"
+                  className="block w-full cursor-pointer rounded-2xl overflow-hidden"
                 >
                   <img
                     src={fullUrl}
                     alt={att.name || 'Ảnh'}
-                    className="w-full max-h-[280px] object-contain bg-transparent"
+                    className="w-full max-h-[280px] object-contain block"
                   />
                 </a>
               );
             }
             if (isVideo) {
               return (
-                <div key={i} className="w-full overflow-hidden bg-transparent">
+                <div key={i} className="w-full rounded-2xl overflow-hidden">
                   <video
                     src={fullUrl}
                     controls
@@ -103,14 +114,14 @@ export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBu
                     muted
                     loop
                     playsInline
-                    className="w-full max-h-[280px] object-contain"
+                    className="w-full max-h-[280px] object-contain block"
                   />
                 </div>
               );
             }
             if (isAudio) {
               return (
-                <div key={i} className={cn('w-full', !(hasMediaOnly && hasImageOrVideo) && 'rounded-lg')}>
+                <div key={i} className="w-full rounded-lg">
                   <audio src={fullUrl} controls className="w-full max-w-full" />
                 </div>
               );
@@ -123,8 +134,10 @@ export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBu
                 rel="noopener noreferrer"
                 onClick={(e) => handleAttachmentClick(e, att.url, att.name)}
                 className={cn(
-                  'inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm cursor-pointer max-w-full',
-                  isOwn ? 'bg-white/10 border border-white/20 text-primary-foreground' : 'bg-muted border border-border text-foreground'
+                  'inline-flex items-center gap-2 text-sm cursor-pointer max-w-full',
+                  isBareFileOnly && 'text-primary hover:underline py-0.5',
+                  !isBareFileOnly && 'px-3 py-2 rounded-xl border',
+                  !isBareFileOnly && (isOwn ? 'bg-white/10 border-white/20 text-primary-foreground' : 'bg-muted border-border text-foreground')
                 )}
               >
                 <span>📎</span>
@@ -134,8 +147,17 @@ export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBu
           })}
         </div>
       )}
-      {message.content && <div className={cn('whitespace-pre-wrap leading-snug', (hasMediaOnly && hasImageOrVideo) ? 'px-4 pb-2' : '')}>{message.content}</div>}
-      <div className={cn('text-[11px] mt-1.5 text-right', isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground', (hasMediaOnly && hasImageOrVideo) ? 'px-4 pb-2' : '')}>
+      {message.content && <div className={cn('whitespace-pre-wrap leading-snug', isBareMedia ? 'px-4 pb-2' : '')}>{message.content}</div>}
+      <div
+        className={cn(
+          'text-[11px] mt-1 text-right',
+          isBareMedia && 'text-muted-foreground',
+          isBareFileOnly && 'text-muted-foreground',
+          !isBareMedia && !isBareFileOnly && (isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'),
+          isBareMedia && 'px-1',
+          !isBareMedia && !isBareFileOnly && 'mt-1.5'
+        )}
+      >
         {time}
       </div>
     </div>

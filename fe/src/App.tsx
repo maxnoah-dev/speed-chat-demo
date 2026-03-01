@@ -5,7 +5,7 @@ import { ChatWindow, type ChatWindowState } from './components/ChatWindow';
 import { useTheme } from './contexts/ThemeContext';
 import type { SystemTheme, ChatFrameColor } from './contexts/ThemeContext';
 import { cn } from './lib/utils';
-import { Sun, Moon, Monitor, Palette, RotateCcw } from 'lucide-react';
+import { Sun, Moon, Monitor, Palette, RotateCcw, MessageCircle, Plus, ChevronRight } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 
 const CHAT_JOIN_STORAGE_KEY = 'speed_chat_join';
@@ -82,6 +82,25 @@ function App() {
   });
   const [showThemePanel, setShowThemePanel] = useState(false);
   const [showAddRoom, setShowAddRoom] = useState(false);
+  /** Id phòng đang chọn để hiển thị (Messenger-style). */
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (windows.length === 0) {
+      setSelectedRoomId(null);
+      return;
+    }
+    setSelectedRoomId((prev) => {
+      if (prev && windows.some((w) => w.id === prev)) return prev;
+      return windows[0].id;
+    });
+  }, [windows]);
+
+  const selectedWindowMeta = selectedRoomId ? windows.find((w) => w.id === selectedRoomId) : null;
+  const effectiveSelectedId =
+    selectedWindowMeta && !selectedWindowMeta.isFloating && !selectedWindowMeta.isMinimized
+      ? selectedRoomId
+      : windows.find((w) => !w.isFloating && !w.isMinimized)?.id ?? windows[0]?.id ?? null;
 
   const handleJoin = useCallback((values: JoinFormValues) => {
     setWindows((prev) => {
@@ -187,23 +206,13 @@ function App() {
     );
   }
 
-  const mainWindow = windows.find((w) => !w.isFloating && !w.isMinimized) ?? windows[0];
-  const showMainInline = mainWindow && !mainWindow.isFloating && !mainWindow.isMinimized;
+  const selectedWindow = effectiveSelectedId ? windows.find((w) => w.id === effectiveSelectedId) : null;
   const overlayWindows = windows.filter((w) => w.isFloating || w.isMinimized);
 
   return (
-    <div className="min-h-[100dvh] bg-muted/30 text-foreground transition-smooth safe-area-top safe-area-bottom">
-      <div className="sticky top-0 z-20 flex items-center justify-between gap-2 p-2 md:p-3 border-b border-border bg-card/80 backdrop-blur-md">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-sm font-medium truncate">Chat · {windows.length} phòng</span>
-          <button
-            type="button"
-            onClick={() => setShowAddRoom(true)}
-            className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary text-primary-foreground hover:opacity-90"
-          >
-            + Thêm phòng
-          </button>
-        </div>
+    <div className="min-h-[100dvh] bg-muted/30 text-foreground transition-smooth safe-area-top safe-area-bottom flex flex-col">
+      <div className="sticky top-0 z-20 flex items-center justify-between gap-2 p-2 md:p-3 border-b border-border bg-card/80 backdrop-blur-md shrink-0">
+        <span className="text-sm font-medium">Speed Chat</span>
         <ThemeToggles
           systemTheme={systemTheme}
           setSystemTheme={setSystemTheme}
@@ -216,23 +225,60 @@ function App() {
         />
       </div>
 
-      <div className="p-2 md:p-4 flex flex-col h-[calc(100dvh-52px)] min-h-0">
-        {showMainInline && mainWindow && (
-          <div className="flex-1 min-h-0 min-w-0 flex flex-col">
-            <ChatWindow
-              state={mainWindow}
-              onStateChange={handleWindowStateChange}
-              onLeave={handleLeave}
-              roomCode={mainWindow.joinValues.room_code}
-              isOnlyWindow={windows.length === 1}
-            />
+      <div className="flex-1 flex min-h-0">
+        {/* Sidebar danh sách phòng (Messenger-style) */}
+        <aside className="w-14 sm:w-56 border-r border-border bg-card/60 flex flex-col shrink-0">
+          <div className="p-2 border-b border-border">
+            <button
+              type="button"
+              onClick={() => setShowAddRoom(true)}
+              className="w-full flex items-center justify-center sm:justify-start gap-2 px-3 py-2.5 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:opacity-90"
+            >
+              <Plus className="h-5 w-5 shrink-0" />
+              <span className="hidden sm:inline">Thêm phòng</span>
+            </button>
           </div>
-        )}
-        {!showMainInline && windows.length > 0 && (
-          <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
-            Thu nhỏ hoặc bấm vào thanh phòng để mở rộng
-          </div>
-        )}
+          <nav className="flex-1 overflow-y-auto p-1">
+            {windows.map((w) => (
+              <button
+                key={w.id}
+                type="button"
+                onClick={() => setSelectedRoomId(w.id)}
+                className={cn(
+                  'w-full flex items-center gap-2 px-2 py-2.5 rounded-xl text-left text-sm transition-smooth',
+                  w.id === effectiveSelectedId
+                    ? 'bg-primary/15 text-primary font-medium'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                )}
+              >
+                <MessageCircle className="h-5 w-5 shrink-0" />
+                <span className="min-w-0 truncate hidden sm:block">
+                  {w.joinValues.room_name || w.joinValues.room_code}
+                </span>
+                <ChevronRight className={cn('h-4 w-4 shrink-0 hidden sm:block', w.id === effectiveSelectedId && 'text-primary')} />
+              </button>
+            ))}
+          </nav>
+        </aside>
+
+        {/* Khung chat: giới hạn width giống Messenger */}
+        <main className="flex-1 min-w-0 flex justify-center md:justify-start overflow-hidden">
+          {selectedWindow ? (
+            <div className="w-full max-w-[480px] md:max-w-[520px] h-full flex flex-col p-2 md:p-3">
+              <ChatWindow
+                state={{ ...selectedWindow, isFloating: false, isMinimized: false }}
+                onStateChange={handleWindowStateChange}
+                onLeave={handleLeave}
+                roomCode={selectedWindow.joinValues.room_code}
+                isOnlyWindow={windows.length === 1}
+              />
+            </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm px-4">
+              Chọn một phòng bên trái hoặc thêm phòng mới
+            </div>
+          )}
+        </main>
       </div>
 
       {overlayWindows.map((w) => (

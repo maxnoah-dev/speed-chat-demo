@@ -266,11 +266,11 @@ function App() {
           {selectedWindow ? (
             <div className="w-full max-w-[480px] md:max-w-[520px] h-full flex flex-col p-2 md:p-3">
               <ChatWindow
-                state={{ ...selectedWindow, isFloating: false, isMinimized: false }}
+                state={{ ...selectedWindow, isFloating: false }}
                 onStateChange={handleWindowStateChange}
                 onLeave={handleLeave}
                 roomCode={selectedWindow.joinValues.room_code}
-                isOnlyWindow={windows.length === 1}
+                isOnlyWindow={false}
               />
             </div>
           ) : (

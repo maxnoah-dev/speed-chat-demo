@@ -23,6 +23,7 @@ export function registerChatHandler(io: SocketIOServer): void {
         // Chỉ người tạo phòng mới set tên; getOrCreateRoomId chỉ dùng room_name khi TẠO MỚI
         await roomService.getOrCreateRoomId(room_code, room_name);
         socket.join(room_code);
+        (socket.data as { roomCode?: string }).roomCode = room_code;
 
         const room = await roomService.findRoomByCode(room_code);
         const room_name_from_db = room?.name ?? room_code;
@@ -69,8 +70,21 @@ export function registerChatHandler(io: SocketIOServer): void {
       }
     });
 
-    socket.on('disconnect', (reason) => {
+    socket.on('disconnect', async (reason) => {
       console.log(`[chat] socket disconnected id=${socket.id} reason=${reason}`);
+      const room_code = (socket.data as { roomCode?: string })?.roomCode;
+      if (room_code) {
+        const room = io.sockets.adapter.rooms.get(room_code);
+        const size = room?.size ?? 0;
+        if (size === 0) {
+          try {
+            await roomService.deleteRoomByCode(room_code);
+            console.log(`[chat] room ${room_code} empty -> cleared from DB`);
+          } catch (err) {
+            console.error('[chat] clear room on empty error:', err);
+          }
+        }
+      }
     });
   });
 }

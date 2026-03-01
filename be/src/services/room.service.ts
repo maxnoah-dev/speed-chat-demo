@@ -19,3 +19,8 @@ export async function getOrCreateRoomId(roomCode: string, roomName?: string): Pr
 export async function findRoomByCode(code: string): Promise<ChatRoom | null> {
   return roomRepo.findRoomByCode(code);
 }
+
+/** Xóa toàn bộ dữ liệu phòng (room + messages). Gọi khi phòng không còn ai. */
+export async function deleteRoomByCode(code: string): Promise<void> {
+  return roomRepo.deleteRoomByCode(code);
+}

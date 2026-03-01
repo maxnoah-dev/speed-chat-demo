@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     environment{
-        SSH_IP = '165.22.99.117'
+        SSH_IP = '152.42.173.173'
         DEPLOY_PATH = '/root/social-full-demo'
         DEPLOYMENT_GITHUB_BRANCH = 'fe-nginx-demo'
     }
 
     stages{
-        stage('Deploy nodejs'){
+        stage('Deploy speed chat'){
             steps {
                 withCredentials(
                     [sshUserPrivateKey(credentialsId: 'ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]

@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useSocket } from '../../hooks/useSocket';
+import { playMessageNotificationSound } from '../../utils/notificationSound';
 import type { ChatMessage } from '../../types/chat';
 import type { JoinFormValues } from './JoinForm';
 import { MessageList } from './MessageList';
@@ -30,19 +31,26 @@ export function ChatRoom({ joinValues, onLeave }: ChatRoomProps) {
     sender: joinValues.sender,
   };
 
-  const onNewMessageCb = useCallback((msg: ChatMessage) => {
-    setMessages((prev) => {
-      const optimisticIdx = prev.findIndex(
-        (m) => (m as ChatMessage & { _opt?: boolean })._opt && m.sender === msg.sender && m.content === msg.content
-      );
-      if (optimisticIdx >= 0) {
-        const next = [...prev];
-        next[optimisticIdx] = msg;
-        return next;
+  const onNewMessageCb = useCallback(
+    (msg: ChatMessage) => {
+      const isFromOthers = msg.sender !== joinValues.sender;
+      if (isFromOthers) {
+        playMessageNotificationSound();
       }
-      return [...prev, msg];
-    });
-  }, []);
+      setMessages((prev) => {
+        const optimisticIdx = prev.findIndex(
+          (m) => (m as ChatMessage & { _opt?: boolean })._opt && m.sender === msg.sender && m.content === msg.content
+        );
+        if (optimisticIdx >= 0) {
+          const next = [...prev];
+          next[optimisticIdx] = msg;
+          return next;
+        }
+        return [...prev, msg];
+      });
+    },
+    [joinValues.sender]
+  );
 
   const { sendMessage, isConnected } = useSocket(
     !!(roomCode && joinValues.sender),

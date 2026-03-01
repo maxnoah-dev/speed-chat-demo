@@ -15,6 +15,18 @@ function isImageAttachment(url: string, name?: string | null): boolean {
   return /\.(jpe?g|png|gif|webp)$/i.test(u) || /\.(jpe?g|png|gif|webp)$/i.test(n);
 }
 
+function isVideoAttachment(url: string, name?: string | null): boolean {
+  const u = (url || '').toLowerCase();
+  const n = (name || '').toLowerCase();
+  return /\.(mp4|webm|mov|avi|mkv)(\?|$)/i.test(u) || /\.(mp4|webm|mov|avi|mkv)$/i.test(n);
+}
+
+function isAudioAttachment(url: string, name?: string | null): boolean {
+  const u = (url || '').toLowerCase();
+  const n = (name || '').toLowerCase();
+  return /\.(mp3|ogg|wav|webm|m4a|aac)(\?|$)/i.test(u) || /\.(mp3|ogg|wav|webm|m4a|aac)$/i.test(n);
+}
+
 function getAttachmentsList(message: ChatMessage): { name: string; url: string }[] {
   if (Array.isArray(message.attachments) && message.attachments.length > 0) {
     return message.attachments;
@@ -55,22 +67,49 @@ export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBu
           {attachmentsList.map((att, i) => {
             const fullUrl = getAttachmentFullUrl(att.url);
             const isImage = isImageAttachment(att.url, att.name);
-            return isImage ? (
-              <a
-                key={i}
-                href={fullUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => handleAttachmentClick(e, att.url, att.name)}
-                className="inline-block cursor-pointer"
-              >
-                <img
-                  src={fullUrl}
-                  alt={att.name || 'Ảnh'}
-                  className="max-w-full max-h-[220px] rounded-md object-cover"
-                />
-              </a>
-            ) : (
+            const isVideo = isVideoAttachment(att.url, att.name);
+            const isAudio = isAudioAttachment(att.url, att.name);
+            if (isImage) {
+              return (
+                <a
+                  key={i}
+                  href={fullUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => handleAttachmentClick(e, att.url, att.name)}
+                  className="inline-block cursor-pointer"
+                >
+                  <img
+                    src={fullUrl}
+                    alt={att.name || 'Ảnh'}
+                    className="max-w-full max-h-[220px] rounded-md object-cover"
+                  />
+                </a>
+              );
+            }
+            if (isVideo) {
+              return (
+                <div key={i} className="rounded-md overflow-hidden max-w-full">
+                  <video
+                    src={fullUrl}
+                    controls
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="max-w-full max-h-[280px] rounded-md"
+                  />
+                </div>
+              );
+            }
+            if (isAudio) {
+              return (
+                <div key={i} className="rounded-md">
+                  <audio src={fullUrl} controls className="max-w-full" />
+                </div>
+              );
+            }
+            return (
               <a
                 key={i}
                 href={fullUrl}

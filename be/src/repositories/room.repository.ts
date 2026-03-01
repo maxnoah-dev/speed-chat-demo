@@ -37,3 +37,9 @@ export async function getOrCreateRoomId(code: string, name?: string): Promise<st
   if (existing) return String(existing.id);
   return createRoom(canonical, name || canonical);
 }
+
+/** Xóa phòng và toàn bộ tin nhắn (cascade). Dùng khi tất cả thành viên đã rời phòng. */
+export async function deleteRoomByCode(code: string): Promise<void> {
+  const canonical = normalizeCode(code);
+  await prisma.chatRoom.deleteMany({ where: { code: canonical } });
+}

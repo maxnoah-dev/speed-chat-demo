@@ -8,8 +8,10 @@ const IMG_EXT = /\.(jpe?g|png|gif|webp|bmp|svg)$/i;
 const PDF_EXT = /\.pdf$/i;
 const DOCX_EXT = /\.docx$/i;
 const DOC_EXT = /\.(doc|xlsx?|pptx?|odt|ods|odp)$/i;
+const VIDEO_EXT = /\.(mp4|webm|mov|avi|mkv)(\?|$)/i;
+const AUDIO_EXT = /\.(mp3|ogg|wav|webm|m4a|aac)(\?|$)/i;
 
-export type ViewerFileType = 'image' | 'pdf' | 'code' | 'docx' | 'doc' | 'other';
+export type ViewerFileType = 'image' | 'pdf' | 'code' | 'docx' | 'doc' | 'video' | 'audio' | 'other';
 
 function getFileType(fileName: string, url: string): ViewerFileType {
   const name = (fileName || url || '').toLowerCase();
@@ -18,6 +20,8 @@ function getFileType(fileName: string, url: string): ViewerFileType {
   if (CODE_EXT.test(name)) return 'code';
   if (DOCX_EXT.test(name)) return 'docx';
   if (DOC_EXT.test(name)) return 'doc';
+  if (VIDEO_EXT.test(name)) return 'video';
+  if (AUDIO_EXT.test(name)) return 'audio';
   return 'other';
 }
 
@@ -119,6 +123,21 @@ export function FileViewerModal({ open, onClose, url, fileName }: FileViewerModa
               title={displayName}
               className="w-full h-[70vh] rounded border border-border"
             />
+          )}
+          {fileType === 'video' && (
+            <video
+              src={fullUrl}
+              controls
+              autoPlay
+              muted
+              playsInline
+              className="w-full max-h-[70vh] rounded border border-border"
+            />
+          )}
+          {fileType === 'audio' && (
+            <div className="flex flex-col items-center gap-4 py-6">
+              <audio src={fullUrl} controls className="w-full max-w-md" />
+            </div>
           )}
           {fileType === 'code' && (
             <div className="rounded border border-border bg-muted/30 overflow-hidden">

@@ -3,7 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import {
   getUploadDir,
-  getMaxFileSize,
+  getMaxVideoSize,
   isAllowedMime,
   getPublicPath,
   ensureUploadDir,
@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: getMaxFileSize() },
+  limits: { fileSize: getMaxVideoSize() }, // 50MB để cho phép video dưới 1 phút
   fileFilter: (_req, file, cb) => {
     if (!isAllowedMime(file.mimetype)) {
       return cb(new Error('Loại tệp không được phép'));

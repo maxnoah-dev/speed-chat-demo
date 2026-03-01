@@ -17,7 +17,7 @@ docker compose --env-file .env.development -f docker-compose.yml -f docker-compo
 ## Production (VPS / deploy)
 
 - FE build với `REACT_APP_API_URL=https://social-demo.maxnoah.io.vn`, CORS tương ứng.
-- Chỉ nginx expose 80/443; FE và BE không expose ra host.
+- Trên VPS chỉ nginx expose 80/443. Ở local, BE cũng expose `3002` để FE (gọi `localhost:3002`) hoạt động khi mở qua nginx (`http://localhost`).
 
 ```bash
 docker compose --env-file .env.production -f docker-compose.yml up -d

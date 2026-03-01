@@ -35,8 +35,8 @@ export function JoinForm({ onSubmit }: JoinFormProps) {
         room_code: code,
         room_name: `Phòng ${code}`,
       });
-    } catch {
-      setError('Không thể tạo mã phòng. Thử lại.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Không thể tạo mã phòng. Thử lại.');
     } finally {
       setLoading(false);
     }

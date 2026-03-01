@@ -31,14 +31,6 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
   const [showCamera, setShowCamera] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const sendFileAsAttachment = useCallback(
-    async (file: File) => {
-      const result = await uploadOne(file);
-      if (result) onSend('', [result]);
-    },
-    [uploadOne, onSend]
-  );
-
   const uploadOne = useCallback(async (file: File): Promise<{ name: string; url: string } | null> => {
     try {
       const res = await uploadFile(file);
@@ -48,6 +40,14 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
       return null;
     }
   }, []);
+
+  const sendFileAsAttachment = useCallback(
+    async (file: File) => {
+      const result = await uploadOne(file);
+      if (result) onSend('', [result]);
+    },
+    [uploadOne, onSend]
+  );
 
   const addFiles = useCallback(
     async (files: FileList | null) => {

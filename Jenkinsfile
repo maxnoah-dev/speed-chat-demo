@@ -1,28 +1,79 @@
 pipeline {
     agent any
 
-    environment{
-        SSH_IP = '152.42.173.173'
-        DEPLOY_PATH = '/root/social-full-demo'
-        DEPLOYMENT_GITHUB_BRANCH = 'fe-nginx-demo'
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+        disableConcurrentBuilds()
     }
 
-    stages{
-        stage('Deploy speed chat'){
+    environment {
+        SSH_IP = '152.42.173.173'
+        DEPLOY_PATH = '/root/social-full-demo'
+        ENV_FILE = '.env.production'
+        COMPOSE_FILE = 'docker-compose.yml'
+    }
+
+    parameters {
+        string(
+            name: 'BRANCH',
+            defaultValue: 'fe-nginx-demo',
+            description: 'Branch to deploy (must exist on remote)'
+        )
+    }
+
+    stages {
+        stage('Checkout') {
             steps {
-                withCredentials(
-                    [sshUserPrivateKey(credentialsId: 'ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]
-                    ){
-                        sh '''
-                        ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" "$SSH_USER"@"$SSH_IP" bash -c "'
-                        cd $DEPLOY_PATH && git pull origin $DEPLOYMENT_GITHUB_BRANCH
-                        docker-compose down
-                        docker-compose build
-                        docker-compose up -d
-                        '"
-                        '''
+                checkout scm
+                sh 'git rev-parse --short HEAD > git_commit.txt'
+                script {
+                    env.GIT_COMMIT_SHORT = readFile('git_commit.txt').trim()
                 }
             }
+        }
+
+        stage('Deploy to server') {
+            steps {
+                script {
+                    def branch = params.BRANCH ?: env.DEPLOYMENT_GITHUB_BRANCH ?: 'fe-nginx-demo'
+                    def remoteCmd = """
+                        set -e
+                        cd ${env.DEPLOY_PATH}
+                        git fetch origin
+                        git checkout ${branch}
+                        git pull origin ${branch}
+                        docker compose --env-file ${env.ENV_FILE} -f ${env.COMPOSE_FILE} down --remove-orphans || true
+                        docker compose --env-file ${env.ENV_FILE} -f ${env.COMPOSE_FILE} build --no-cache
+                        docker compose --env-file ${env.ENV_FILE} -f ${env.COMPOSE_FILE} up -d
+                        docker compose --env-file ${env.ENV_FILE} -f ${env.COMPOSE_FILE} ps
+                    """.stripIndent().trim().replace('\n', ' && ')
+
+                    withCredentials([
+                        sshUserPrivateKey(
+                            credentialsId: 'ssh-key',
+                            keyFileVariable: 'SSH_KEY',
+                            usernameVariable: 'SSH_USER'
+                        )
+                    ]) {
+                        sh """
+                            chmod 600 "\$SSH_KEY" 2>/dev/null || true
+                            ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i "\$SSH_KEY" "\$SSH_USER"@${env.SSH_IP} '${remoteCmd}'
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Deployed ${params.BRANCH} (${env.GIT_COMMIT_SHORT ?: 'N/A'}) to ${env.SSH_IP}:${env.DEPLOY_PATH}"
+        }
+        failure {
+            echo "Deploy failed. Check logs and server: ssh ${env.SSH_IP}"
+        }
+        cleanup {
+            sh 'rm -f git_commit.txt'
         }
     }
 }

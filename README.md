@@ -11,6 +11,8 @@ social-full-demo/
 └── database.sql        # MySQL database schema
 ```
 
+**Env:** Docker dùng file `.env` ở **root** (xem [DOCKER.md](./DOCKER.md)). Chạy FE/BE local thì dùng env trong từng thư mục fe/, be/.
+
 ## Setup
 
 ### 1. Database

@@ -50,7 +50,8 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME:-social_demo}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3003}
-      - DATABASE_URL=${DATABASE_URL}
+      # DATABASE_URL tự ghép từ DB_* trong be (có thể set DATABASE_URL để override)
+      - DATABASE_URL=${DATABASE_URL:-}
     restart: unless-stopped
     depends_on:
       - mysql
@@ -64,8 +65,6 @@ services:
       - app-network
     expose:
       - 3002
-    ports:
-      - "3002:3002"
 
   mysql:
     image: mysql:8.0

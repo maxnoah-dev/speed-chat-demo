@@ -21,35 +21,14 @@ const io = new SocketIOServer(server, {
 
 const PORT = process.env.PORT || 3002;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '';
-
-// CORS: hỗ trợ nhiều origin (cách nhau bằng dấu phẩy), hoặc cho phép localhost/127.0.0.1 khi chỉ định một origin
-const allowedOrigins = CORS_ORIGIN
-  ? CORS_ORIGIN.split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
-  : [];
+const corsOrigins = CORS_ORIGIN ? CORS_ORIGIN.split(',').map((s) => s.trim()).filter(Boolean) : [];
 
 app.set('trust proxy', 1);
 app.use(helmet());
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (!CORS_ORIGIN) return callback(null, true); // allow all when not set
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      // Cho phép localhost / 127.0.0.1 bất kỳ port (tránh lỗi khi mở 127.0.0.1 thay vì localhost)
-      try {
-        const u = new URL(origin);
-        if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') return callback(null, true);
-      } catch {
-        // ignore
-      }
-      return callback(null, false);
-    },
+    origin: corsOrigins.length ? corsOrigins : true,
     credentials: true,
-    optionsSuccessStatus: 200,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 app.use(express.json({ limit: '1mb' }));

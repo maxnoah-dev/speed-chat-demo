@@ -4,9 +4,7 @@ WORKDIR /fe
 
 COPY package.json yarn.lock ./
 RUN yarn config set network-timeout 3000000
-# Giới hạn RAM cho Node (VPS ít RAM); bỏ hoặc tăng nếu máy đủ mạnh
-ENV NODE_OPTIONS=--max-old-space-size=768
-RUN yarn install --network-concurrency 1
+RUN yarn install
 COPY . .
 
 ARG REACT_APP_API_URL

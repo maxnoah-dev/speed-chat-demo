@@ -125,13 +125,14 @@ function App() {
     setWindows((prev) => {
       const next = prev.filter((w) => w.id !== id);
       if (next.length > 0) {
-        if (next.every((w) => w.isFloating || w.isMinimized)) {
-          next[0] = { ...next[0], isFloating: false, isMinimized: false };
-        }
-        saveStoredRooms(next.map((w) => w.joinValues));
-      } else {
-        saveStoredRooms([]);
+        const needExpand = next.every((w) => w.isFloating || w.isMinimized);
+        const resolved = needExpand
+          ? next.map((w, i) => (i === 0 ? { ...w, isFloating: false, isMinimized: false } : w))
+          : next;
+        saveStoredRooms(resolved.map((w) => w.joinValues));
+        return resolved;
       }
+      saveStoredRooms([]);
       return next;
     });
   }, []);

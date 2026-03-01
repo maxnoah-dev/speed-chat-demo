@@ -185,16 +185,12 @@ export function ChatWindow({ state, onStateChange, onLeave, roomCode, isOnlyWind
           >
             {videoActive ? <VideoOff className="h-4 w-4" /> : <Video className="h-4 w-4" />}
           </Button>
-          {!isOnlyWindow && (
-            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={toggleMinimize} title="Thu nhỏ">
-              <Minus className="h-4 w-4" />
-            </Button>
-          )}
-          {!isOnlyWindow && (
-            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={toggleFloat} title={isFloating ? 'Ghim vào trang' : 'Kéo ra'}>
-              <Square className="h-4 w-4" />
-            </Button>
-          )}
+          <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={toggleMinimize} title="Thu nhỏ">
+            <Minus className="h-4 w-4" />
+          </Button>
+          <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={toggleFloat} title={isFloating ? 'Ghim vào trang' : 'Kéo ra'}>
+            <Square className="h-4 w-4" />
+          </Button>
           <Button type="button" variant="outline" size="sm" className="rounded-lg text-xs" onClick={() => onLeave(id)}>
             Thoát
           </Button>

@@ -10,4 +10,5 @@ if [ -z "$DATABASE_URL" ] && [ -n "$DB_HOST" ]; then
     console.log('mysql://' + u + ':' + encodeURIComponent(p) + '@' + h + ':3306/' + d);
   ")
 fi
+# Chạy lệnh (thường là: yarn start = prisma migrate deploy && node dist/index.js)
 exec "$@"

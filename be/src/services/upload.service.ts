@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import mimeTypes from 'mime-types';
+import * as mimeTypes from 'mime-types';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB (tài liệu, ảnh, ...)

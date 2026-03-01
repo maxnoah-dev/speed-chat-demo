@@ -28,8 +28,10 @@ export function JoinForm({ onSubmit }: JoinFormProps) {
     setError('');
     setLoading(true);
     try {
-      const code = await generateRoomCode();
-      setRoomCode(code);
+      const code = roomCode.trim()
+        ? roomCode.trim().toUpperCase()
+        : await generateRoomCode();
+      if (!roomCode.trim()) setRoomCode(code);
       onSubmit({
         sender: sender.trim(),
         room_code: code,

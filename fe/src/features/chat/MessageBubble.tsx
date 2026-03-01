@@ -53,8 +53,8 @@ export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBu
   return (
     <div
       className={cn(
-        'max-w-[78%] rounded-lg px-3.5 py-2.5 text-sm break-words',
-        isOwn ? 'ml-auto bg-primary text-primary-foreground' : 'bg-card border border-border shadow-sm'
+        'max-w-[78%] rounded-2xl px-4 py-2.5 text-sm break-words transition-smooth',
+        isOwn ? 'ml-auto bg-primary text-primary-foreground shadow-md' : 'bg-card border border-border shadow-sm rounded-tl-md'
       )}
     >
       {!isOwn && (
@@ -82,7 +82,7 @@ export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBu
                   <img
                     src={fullUrl}
                     alt={att.name || 'Ảnh'}
-                    className="max-w-full max-h-[220px] rounded-md object-cover"
+                    className="max-w-full max-h-[220px] rounded-xl object-cover"
                   />
                 </a>
               );

@@ -97,38 +97,38 @@ export function ChatRoom({ joinValues, onLeave }: ChatRoomProps) {
   );
 
   return (
-    <Card className="flex flex-col w-full max-w-[520px] mx-auto overflow-hidden h-[calc(100vh-4rem)] min-h-[480px] border-border">
-      <header className="flex items-center justify-between gap-3 p-4 border-b border-border bg-card">
+    <Card className="flex flex-col w-full max-w-[520px] mx-auto overflow-hidden h-[calc(100vh-4rem)] min-h-[480px] rounded-2xl border-border shadow-xl shadow-black/5 transition-smooth">
+      <header className="flex items-center justify-between gap-3 p-4 border-b border-border bg-card/95 backdrop-blur-sm">
         <div className="min-w-0 flex-1">
-          <h1 className="font-semibold text-foreground truncate">
+          <h1 className="font-semibold text-foreground truncate text-lg">
             {serverRoomName ?? (joinValues.room_name || roomCode)}
           </h1>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground mt-0.5">
             Mã phòng: <strong className="text-foreground">{roomCode}</strong>
             {' · '}
             Bạn: <strong className="text-foreground">{joinValues.sender}</strong>
             {typeof isConnected === 'boolean' && (
               <>
                 {' · '}
-                <span className={isConnected ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}>
+                <span className={isConnected ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}>
                   {isConnected ? 'Đã kết nối' : 'Đang kết nối...'}
                 </span>
               </>
             )}
           </p>
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={onLeave} className="shrink-0">
+        <Button type="button" variant="outline" size="sm" onClick={onLeave} className="shrink-0 rounded-xl transition-smooth">
           Thoát phòng
         </Button>
       </header>
 
       {info && (
-        <div className="px-4 py-2 text-center text-sm bg-muted text-muted-foreground border-b border-border">
+        <div className="px-4 py-2 text-center text-sm bg-accent/50 text-muted-foreground border-b border-border transition-smooth">
           {info}
         </div>
       )}
 
-      <div className="flex flex-1 flex-col min-h-0 bg-muted/30">
+      <div className="flex flex-1 flex-col min-h-0 bg-muted/20">
         <MessageList messages={messages} currentSender={joinValues.sender} />
         <MessageInput onSend={handleSend} />
       </div>

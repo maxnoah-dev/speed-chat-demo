@@ -9,6 +9,7 @@ import rateLimit from 'express-rate-limit';
 import { ensureUploadDir } from './services/upload.service';
 import apiRoutes from './routes';
 import { registerChatHandler } from './socket/chat.handler';
+import { registerMatchHandler } from './socket/match.handler';
 
 ensureUploadDir();
 
@@ -55,6 +56,7 @@ app.use((req, res, next) => {
 });
 
 registerChatHandler(io);
+registerMatchHandler(io);
 
 server.listen(PORT, () => {
   console.log(`Server is running (HTTP+WebSocket) on port ${PORT}`);

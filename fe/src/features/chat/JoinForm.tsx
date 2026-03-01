@@ -63,18 +63,19 @@ export function JoinForm({ onSubmit }: JoinFormProps) {
   };
 
   return (
-    <Card className="w-full max-w-[400px] mx-auto border-border">
-      <CardHeader className="text-center space-y-1.5">
-        <CardTitle className="text-xl">Chat nhóm</CardTitle>
-        <CardDescription>Chỉ cần nhập tên và mã phòng — không cần đăng nhập</CardDescription>
+    <Card className="w-full max-w-[400px] mx-auto rounded-2xl border-border shadow-xl shadow-black/5 transition-smooth">
+      <CardHeader className="text-center space-y-2 pb-2">
+        <CardTitle className="text-2xl font-semibold tracking-tight">Chat nhóm</CardTitle>
+        <CardDescription className="text-muted-foreground">Nhập tên và mã phòng — không cần đăng nhập</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
         <form className="flex flex-col gap-4" onSubmit={handleJoin}>
           <Input
             placeholder="Tên của bạn *"
             value={sender}
             onChange={(e) => setSender(e.target.value)}
             maxLength={100}
+            className="rounded-xl border-border bg-background transition-smooth"
           />
           <div className="flex gap-2">
             <Input
@@ -82,14 +83,14 @@ export function JoinForm({ onSubmit }: JoinFormProps) {
               value={roomCode}
               onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
               readOnly={loading}
-              className="flex-1 min-w-0"
+              className="flex-1 min-w-0 rounded-xl border-border transition-smooth"
             />
-            <Button type="button" variant="secondary" onClick={handleCreateNew} disabled={loading}>
-              {loading ? 'Đang tạo...' : 'Tạo phòng mới'}
+            <Button type="button" variant="secondary" onClick={handleCreateNew} disabled={loading} className="rounded-xl transition-smooth shrink-0">
+              {loading ? 'Đang tạo...' : 'Tạo phòng'}
             </Button>
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full">Vào phòng chat</Button>
+          {error && <p className="text-sm text-destructive px-0.5">{error}</p>}
+          <Button type="submit" className="w-full rounded-xl h-11 font-medium transition-smooth">Vào phòng chat</Button>
         </form>
       </CardContent>
     </Card>

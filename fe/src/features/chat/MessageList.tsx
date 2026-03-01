@@ -30,8 +30,8 @@ export function MessageList({ messages, currentSender }: MessageListProps) {
       <ScrollArea className="flex-1 min-h-0 px-4 py-3">
         <div className="flex flex-col gap-2.5">
           {messages.length === 0 && (
-            <p className="text-center text-sm text-muted-foreground py-8">
-              Chưa có tin nhắn. Hãy gửi lời chào!
+            <p className="text-center text-sm text-muted-foreground py-12">
+              Chưa có tin nhắn. Gửi lời chào, sticker hoặc GIF nhé 👋
             </p>
           )}
           {messages.map((msg, idx) => (

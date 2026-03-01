@@ -2,8 +2,12 @@ import React, { useState, useRef, useCallback } from 'react';
 import { uploadFile } from '../../services/api';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
+import { EmojiStickerPicker } from '../../components/EmojiStickerPicker';
+import { GifPicker } from '../../components/GifPicker';
+import { VoiceRecordButton } from '../../components/VoiceRecordButton';
+import { CameraCaptureModal } from '../../components/CameraCaptureModal';
 import { cn } from '../../lib/utils';
-import { Paperclip, X } from 'lucide-react';
+import { Paperclip, X, Smile, ImageIcon, Camera } from 'lucide-react';
 
 export interface PendingAttachment {
   file: File;
@@ -22,7 +26,18 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
   const [text, setText] = useState('');
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [dragOver, setDragOver] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [showGif, setShowGif] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const sendFileAsAttachment = useCallback(
+    async (file: File) => {
+      const result = await uploadOne(file);
+      if (result) onSend('', [result]);
+    },
+    [uploadOne, onSend]
+  );
 
   const uploadOne = useCallback(async (file: File): Promise<{ name: string; url: string } | null> => {
     try {
@@ -95,29 +110,54 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
 
   const handleDragLeave = () => setDragOver(false);
 
+  const handleEmojiSelect = (emoji: string) => {
+    setText((prev) => prev + emoji);
+  };
+
+  const handleGifSelect = (gifUrl: string) => {
+    setShowGif(false);
+    onSend('', [{ name: 'gif.gif', url: gifUrl }]);
+  };
+
   return (
     <div
       className={cn(
-        'border-t border-border bg-card p-3',
-        dragOver && 'bg-muted outline outline-2 outline-dashed outline-border'
+        'border-t border-border bg-card/95 backdrop-blur-sm p-3 transition-smooth',
+        dragOver && 'bg-muted/80 border-2 border-dashed border-primary/40'
       )}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
     >
+      {(showEmoji || showGif) && (
+        <div className="mb-3 flex justify-start">
+          {showEmoji && (
+            <EmojiStickerPicker
+              onSelect={handleEmojiSelect}
+              onClose={() => setShowEmoji(false)}
+            />
+          )}
+          {showGif && (
+            <GifPicker
+              onSelect={handleGifSelect}
+              onClose={() => setShowGif(false)}
+            />
+          )}
+        </div>
+      )}
       {attachments.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-2.5">
           {attachments.map((a, i) => (
             <div
               key={i}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-muted border border-border text-muted-foreground text-xs"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-muted/80 border border-border text-muted-foreground text-xs transition-smooth"
             >
               <span className="max-w-[140px] truncate">
                 {a.uploading ? 'Đang tải...' : a.error || a.name}
               </span>
               <button
                 type="button"
-                className="p-0.5 rounded hover:text-destructive hover:bg-destructive/10 transition-colors"
+                className="p-0.5 rounded-md hover:text-destructive hover:bg-destructive/10 transition-smooth"
                 onClick={() => removeAttachment(i)}
                 aria-label="Xóa"
               >
@@ -142,21 +182,64 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
           type="button"
           variant="outline"
           size="icon"
+          onClick={() => { setShowGif(false); setShowEmoji((e) => !e); }}
+          disabled={disabled}
+          title="Sticker / Emoji"
+          aria-label="Sticker"
+          className={cn('rounded-xl transition-smooth', showEmoji && 'bg-accent')}
+        >
+          <Smile className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => { setShowEmoji(false); setShowGif((g) => !g); }}
+          disabled={disabled}
+          title="GIF"
+          aria-label="GIF"
+          className={cn('rounded-xl transition-smooth', showGif && 'bg-accent')}
+        >
+          <ImageIcon className="h-4 w-4" />
+        </Button>
+        <VoiceRecordButton onRecorded={sendFileAsAttachment} disabled={disabled} />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => setShowCamera(true)}
+          disabled={disabled}
+          title="Chụp ảnh"
+          aria-label="Chụp ảnh"
+          className="rounded-xl transition-smooth"
+        >
+          <Camera className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled}
           title="Đính kèm tệp"
           aria-label="Đính kèm tệp"
+          className="rounded-xl transition-smooth"
         >
           <Paperclip className="h-4 w-4" />
         </Button>
+        <CameraCaptureModal
+          open={showCamera}
+          onClose={() => setShowCamera(false)}
+          onCapture={sendFileAsAttachment}
+        />
         <Input
           placeholder="Nhập tin nhắn..."
           value={text}
           onChange={(e) => setText(e.target.value)}
           disabled={disabled}
-          className="flex-1 min-w-0"
+          className="flex-1 min-w-0 rounded-xl border-border transition-smooth"
         />
-        <Button type="submit" disabled={disabled}>Gửi</Button>
+        <Button type="submit" disabled={disabled} className="rounded-xl transition-smooth">Gửi</Button>
       </form>
     </div>
   );

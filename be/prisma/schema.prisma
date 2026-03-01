@@ -10,23 +10,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id         Int      @id @default(autoincrement())
-  name       String   @db.VarChar(100)
-  email      String   @unique @db.VarChar(100)
-  created_at DateTime @default(now())
-  posts      Post[]
-  @@map("users")
+// --- Matching (ghép đôi ngẫu nhiên) ---
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }
 
-model Post {
-  id         Int      @id @default(autoincrement())
-  user_id    Int
-  title      String   @db.VarChar(200)
-  content    String?  @db.Text
-  created_at DateTime @default(now())
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  @@map("posts")
+enum MatchSeekerStatus {
+  WAITING
+  MATCHED
+}
+
+model MatchSeeker {
+  id             String            @id
+  socket_id      String            @unique @map("socket_id") @db.VarChar(100)
+  display_name   String            @map("display_name") @db.VarChar(100)
+  gender         Gender
+  seeking_gender Gender?           @map("seeking_gender") // null = ANY
+  status         MatchSeekerStatus @default(WAITING)
+  room_code      String?           @map("room_code") @db.VarChar(50)
+  created_at     DateTime         @default(now()) @map("created_at")
+  @@map("match_seekers")
 }
 
 model ChatRoom {

@@ -1,4 +1,4 @@
-# Frontend - Social Demo
+# Frontend - Speed Chat
 
 ## Setup
 

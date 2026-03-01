@@ -28,7 +28,7 @@ services:
     environment:
       DB_HOST: mysql
       DB_USER: root
-      DB_NAME: social_demo
+      DB_NAME: speed_chat
     command: sh -c "export DB_PASSWORD=$$MYSQL_ROOT_PASSWORD && npx prisma migrate deploy"
     depends_on:
       mysql:

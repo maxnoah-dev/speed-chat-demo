@@ -49,7 +49,7 @@ services:
       - DB_HOST=mysql
       - DB_USER=${DB_USER:-root}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME:-social_demo}
+      - DB_NAME=${DB_NAME:-speed_chat}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3003}
       # DATABASE_URL tự ghép từ DB_* trong be (có thể set DATABASE_URL để override)
       - DATABASE_URL=${DATABASE_URL:-}

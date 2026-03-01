@@ -1,7 +1,7 @@
 {
-  "name": "social-demo-backend",
+  "name": "speed-chat-backend",
   "version": "1.0.0",
-  "description": "Backend API for social demo",
+  "description": "Backend API for Speed Chat",
   "main": "dist/index.js",
   "scripts": {
     "dev": "NODE_ENV=development ts-node-dev --respawn --transpile-only src/index.ts",

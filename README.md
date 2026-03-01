@@ -1,11 +1,11 @@
-# Social Demo Project
+# Speed Chat Project
 
 Demo project với Frontend (React + TypeScript) và Backend (Express.js + Node.js) kết nối với MySQL.
 
 ## Cấu trúc dự án
 
 ```
-social-full-demo/
+speed-chat/
 ├── fe/                 # Frontend React + TypeScript
 ├── be/                 # Backend Express.js + Node.js
 └── database.sql        # MySQL database schema
@@ -18,7 +18,7 @@ social-full-demo/
 ### 1. Database
 Mở docker, chạy trong CLI localhost hoặc chạy trong VPS để khởi tạo MYSQL DB:
 ```bash
-docker run -d -p 3306:3306 --name social_demo -e MYSQL_ROOT_PASSWORD=EcmkSiw4ec6ZD0KtScZdpo8gxhpLdFNZnUxUiidKplR mysql
+docker run -d -p 3306:3306 --name speed_chat -e MYSQL_ROOT_PASSWORD=EcmkSiw4ec6ZD0KtScZdpo8gxhpLdFNZnUxUiidKplR mysql
 ```
 
 Dùng Table Plus để mở cổng 3306 của host localhost, copy nội dung của `database.sql` vào trong Query trong Table Plus để tạo database và tables.

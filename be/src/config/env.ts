@@ -10,5 +10,5 @@ config({ path: path.join(root, `.env.${nodeEnv}`), override: true });
 config({ path: path.join(root, '.env.local'), override: true });
 
 if (!process.env.DATABASE_URL && process.env.DB_HOST) {
-  process.env.DATABASE_URL = `mysql://${process.env.DB_USER || 'root'}:${encodeURIComponent(process.env.DB_PASSWORD || '')}@${process.env.DB_HOST}:3306/${process.env.DB_NAME || 'social_demo'}`;
+  process.env.DATABASE_URL = `mysql://${process.env.DB_USER || 'root'}:${encodeURIComponent(process.env.DB_PASSWORD || '')}@${process.env.DB_HOST}:3306/${process.env.DB_NAME || 'speed_chat'}`;
 }

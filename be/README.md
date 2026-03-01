@@ -1,4 +1,4 @@
-# Backend - Social Demo
+# Backend - Speed Chat
 
 ## Setup
 

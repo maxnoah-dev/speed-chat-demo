@@ -8,7 +8,7 @@
 
 **Trên server:** Bắt buộc có file `.env.production` ở thư mục gốc. Ít nhất cần:
 - `DB_PASSWORD=...` (trùng mật khẩu trong `.env.mysql`).
-Hoặc set luôn: `DATABASE_URL=mysql://root:MẬT_KHẨU@mysql:3306/social_demo`.
+Hoặc set luôn: `DATABASE_URL=mysql://root:MẬT_KHẨU@mysql:3306/speed_chat`.
 Cùng file này compose sẽ load vào container BE (`env_file`).
 
 Env: compose đọc **root**. MySQL dùng `.env.mysql`.

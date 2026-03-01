@@ -2,12 +2,9 @@ FROM node:20 as build-react
 
 WORKDIR /fe
 
-COPY package.json .
-
+COPY package.json yarn.lock ./
 RUN yarn config set network-timeout 3000000
-
 RUN yarn install
-
 COPY . .
 
 ARG REACT_APP_API_URL

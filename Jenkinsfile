@@ -8,6 +8,7 @@ pipeline {
 
     environment {
         SSH_IP = '152.42.173.173'
+        SSH_USERNAME = 'root'
         DEPLOY_PATH = '/root/social-full-demo'
         ENV_FILE = '.env.production'
         COMPOSE_FILE = 'docker-compose.yml'
@@ -35,28 +36,19 @@ pipeline {
         stage('Verify env on server') {
             steps {
                 script {
-                    withCredentials([
-                        sshUserPrivateKey(
-                            credentialsId: 'ssh-key',
-                            keyFileVariable: 'SSH_KEY',
-                            usernameVariable: 'SSH_USER'
-                        )
-                    ]) {
-                        def ip = env.SSH_IP
-                        def path = env.DEPLOY_PATH
-                        sh(
-                            script: """
-                                chmod 600 "\$SSH_KEY" 2>/dev/null || true
-                                ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i "\$SSH_KEY" "\$SSH_USER"@${ip} "test -f ${path}/.env.production && test -f ${path}/.env.mysql" || {
-                                    echo "ERROR: Trên server thiếu file env. Cần tạo:"
-                                    echo "  - ${path}/.env.production (xem .env.production.example trong repo)"
-                                    echo "  - ${path}/.env.mysql (MYSQL_ROOT_PASSWORD, MYSQL_DATABASE)"
-                                    echo "DB_PASSWORD trong .env.production phải trùng MYSQL_ROOT_PASSWORD trong .env.mysql."
-                                    exit 1
-                                }
-                            """,
-                            label: 'Verify env on server'
-                        )
+                    def ip = env.SSH_IP
+                    def path = env.DEPLOY_PATH
+                    def user = env.SSH_USERNAME
+                    sshagent(credentials: ['ssh-key']) {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${user}@${ip} "test -f ${path}/.env.production && test -f ${path}/.env.mysql" || {
+                                echo "ERROR: Trên server thiếu file env. Cần tạo:"
+                                echo "  - ${path}/.env.production (xem .env.production.example trong repo)"
+                                echo "  - ${path}/.env.mysql (MYSQL_ROOT_PASSWORD, MYSQL_DATABASE)"
+                                echo "DB_PASSWORD trong .env.production phải trùng MYSQL_ROOT_PASSWORD trong .env.mysql."
+                                exit 1
+                            }
+                        """
                     }
                 }
             }
@@ -78,21 +70,9 @@ pipeline {
                         docker-compose --env-file ${env.ENV_FILE} -f ${env.COMPOSE_FILE} ps
                     """.stripIndent().trim().replace('\n', ' && ')
 
-                    withCredentials([
-                        sshUserPrivateKey(
-                            credentialsId: 'ssh-key',
-                            keyFileVariable: 'SSH_KEY',
-                            usernameVariable: 'SSH_USER'
-                        )
-                    ]) {
-                        def ip = env.SSH_IP
-                        sh(
-                            script: """
-                                chmod 600 "\$SSH_KEY" 2>/dev/null || true
-                                ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i "\$SSH_KEY" "\$SSH_USER"@${ip} '${remoteCmd}'
-                            """,
-                            label: 'Deploy via SSH'
-                        )
+                    def ip = env.SSH_IP
+                    sshagent(credentials: ['ssh-key']) {
+                        sh "ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${env.SSH_USERNAME}@${ip} '${remoteCmd}'"
                     }
                 }
             }

@@ -57,9 +57,33 @@
   --ring: 263 70% 55%;
 }
 
+/* Chat frame accent (màu khung chat) */
+[data-chat-frame="violet"] { --chat-frame: 262 83% 58%; --chat-frame-muted: 262 60% 95%; }
+[data-chat-frame="blue"]   { --chat-frame: 217 91% 60%; --chat-frame-muted: 217 90% 95%; }
+[data-chat-frame="emerald"]{ --chat-frame: 160 84% 39%; --chat-frame-muted: 160 60% 95%; }
+[data-chat-frame="rose"]   { --chat-frame: 347 77% 50%; --chat-frame-muted: 347 70% 95%; }
+[data-chat-frame="slate"]  { --chat-frame: 215 16% 47%; --chat-frame-muted: 215 20% 94%; }
+.dark[data-chat-frame="violet"] { --chat-frame-muted: 262 40% 22%; }
+.dark[data-chat-frame="blue"]   { --chat-frame-muted: 217 50% 22%; }
+.dark[data-chat-frame="emerald"]{ --chat-frame-muted: 160 40% 22%; }
+.dark[data-chat-frame="rose"]   { --chat-frame-muted: 347 40% 22%; }
+.dark[data-chat-frame="slate"]  { --chat-frame-muted: 215 20% 22%; }
+
+/* Safe area cho mobile */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .safe-area-top { padding-top: env(safe-area-inset-top); }
+}
+
 /* Mượt khi chuyển tab / hover */
 @layer utilities {
   .transition-smooth {
     @apply transition-all duration-200 ease-out;
+  }
+  .chat-frame-border {
+    border-color: hsl(var(--chat-frame) / 0.4);
+  }
+  .chat-frame-header {
+    background: hsl(var(--chat-frame-muted) / 0.6);
   }
 }

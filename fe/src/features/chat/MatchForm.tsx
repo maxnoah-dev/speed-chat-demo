@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useMatchSocket } from '../../hooks/useMatchSocket';
 import type { Gender } from '../../types/match';
-import type { JoinFormValues } from './JoinForm';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';

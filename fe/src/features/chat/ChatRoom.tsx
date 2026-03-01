@@ -16,9 +16,11 @@ function normalizeRoomCode(code: string): string {
 interface ChatRoomProps {
   joinValues: JoinFormValues;
   onLeave: () => void;
+  /** Khi true: không render header/card, chỉ nội dung (dùng trong ChatWindow). */
+  embedded?: boolean;
 }
 
-export function ChatRoom({ joinValues, onLeave }: ChatRoomProps) {
+export function ChatRoom({ joinValues, onLeave, embedded }: ChatRoomProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [info, setInfo] = useState('');
   /** Tên phòng từ server (đồng bộ cho mọi user trong phòng) */
@@ -96,6 +98,28 @@ export function ChatRoom({ joinValues, onLeave }: ChatRoomProps) {
     [sendMessage, roomCode, joinValues.sender]
   );
 
+  const body = (
+    <>
+      {info && (
+        <div className="px-4 py-2 text-center text-sm bg-accent/50 text-muted-foreground border-b border-border transition-smooth">
+          {info}
+        </div>
+      )}
+      <div className="flex flex-1 flex-col min-h-0 bg-muted/20">
+        <MessageList messages={messages} currentSender={joinValues.sender} />
+        <MessageInput onSend={handleSend} />
+      </div>
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+        {body}
+      </div>
+    );
+  }
+
   return (
     <Card className="flex flex-col w-full max-w-[520px] mx-auto overflow-hidden h-[calc(100vh-4rem)] min-h-[480px] rounded-2xl border-border shadow-xl shadow-black/5 transition-smooth">
       <header className="flex items-center justify-between gap-3 p-4 border-b border-border bg-card/95 backdrop-blur-sm">
@@ -121,17 +145,7 @@ export function ChatRoom({ joinValues, onLeave }: ChatRoomProps) {
           Thoát phòng
         </Button>
       </header>
-
-      {info && (
-        <div className="px-4 py-2 text-center text-sm bg-accent/50 text-muted-foreground border-b border-border transition-smooth">
-          {info}
-        </div>
-      )}
-
-      <div className="flex flex-1 flex-col min-h-0 bg-muted/20">
-        <MessageList messages={messages} currentSender={joinValues.sender} />
-        <MessageInput onSend={handleSend} />
-      </div>
+      {body}
     </Card>
   );
 }

@@ -41,6 +41,12 @@ export function registerChatHandler(io: SocketIOServer): void {
       }
     });
 
+    socket.on('video_signal', (payload: { type: string; [key: string]: unknown }) => {
+      const room_code = (socket.data as { roomCode?: string })?.roomCode;
+      if (!room_code || !payload?.type) return;
+      socket.to(room_code).emit('video_signal', { ...payload, from: socket.id });
+    });
+
     socket.on('send_message', async (payload: SendMessagePayload) => {
       const room_code = normalizeRoomCode(payload?.room_code);
       const { sender, content, attachment_name, attachment_url, attachments } = payload ?? {};

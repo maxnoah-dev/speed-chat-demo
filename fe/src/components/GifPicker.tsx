@@ -49,8 +49,12 @@ export function GifPicker({ onSelect, onClose, className }: GifPickerProps) {
 
   if (!GIPHY_API_KEY) {
     return (
-      <div className={cn('rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground', className)}>
-        <p>Thêm <code className="bg-muted px-1 rounded">REACT_APP_GIPHY_API_KEY</code> vào file <code className="bg-muted px-1 rounded">.env</code> để tìm GIF (miễn phí tại giphy.com).</p>
+      <div className={cn('rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground space-y-2', className)}>
+        <p>Để tìm GIF, thêm key vào file <code className="bg-muted px-1 rounded">.env.development.local</code> (dev) hoặc biến build (prod):</p>
+        <p><code className="bg-muted px-1 rounded text-xs">REACT_APP_GIPHY_API_KEY=your_key</code></p>
+        <a href="https://developers.giphy.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+          Lấy key miễn phí tại Giphy →
+        </a>
       </div>
     );
   }

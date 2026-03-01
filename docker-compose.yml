@@ -79,11 +79,12 @@ services:
     volumes:
       - ./database.sql:/docker-entrypoint-initdb.d/database.sql:ro
     healthcheck:
+      # MYSQL_ROOT_PASSWORD từ .env.mysql; start_period dài vì lần đầu MySQL chạy init script có thể lâu
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p\"$$MYSQL_ROOT_PASSWORD\" || exit 1"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
     networks:
       - app-network
 

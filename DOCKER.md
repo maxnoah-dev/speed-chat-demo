@@ -11,7 +11,10 @@
 Hoặc set luôn: `DATABASE_URL=mysql://root:MẬT_KHẨU@mysql:3306/speed_chat`.
 Cùng file này compose sẽ load vào container BE (`env_file`).
 
-Env: compose đọc **root**. MySQL dùng `.env.mysql`.
+Env: compose đọc **root**. MySQL dùng `.env.mysql`. Trên server cần file `.env.mysql` với ít nhất: `MYSQL_ROOT_PASSWORD=...`, `MYSQL_DATABASE=speed_chat` (nếu dùng).
+
+**Nếu container mysql báo unhealthy:**  
+Xem log: `docker logs mysql`. Đảm bảo có `.env.mysql` và `MYSQL_ROOT_PASSWORD` đúng. Healthcheck có start_period 60s (MySQL lần đầu có thể chạy init script lâu). Nếu mật khẩu có ký tự đặc biệt (`, $, ", \), thử đặt mật khẩu đơn giản trong `.env.mysql` để thử.
 
 **Nếu container be-nodejs báo unhealthy:**  
 Xem log: `docker logs be-nodejs`. Thường do (1) Prisma migrate lỗi (sai `DB_PASSWORD` / `DATABASE_URL` hoặc MySQL chưa sẵn sàng), (2) thiếu biến env trong `.env.production`. Đảm bảo `DB_HOST=mysql`, `DB_PASSWORD` trùng với `.env.mysql`, `DB_NAME=speed_chat`. Entrypoint đã có retry 5 lần cho migrate; healthcheck có start_period 120s và 12 lần thử.

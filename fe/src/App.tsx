@@ -20,31 +20,41 @@ const CHAT_FRAME_COLORS: { value: ChatFrameColor; label: string }[] = [
   { value: 'slate', label: 'Xám' },
 ];
 
-function loadStoredJoin(): JoinFormValues | null {
+function normalizeJoinValues(v: { sender?: unknown; room_code?: unknown; room_name?: unknown }): JoinFormValues | null {
+  if (!v || typeof v.sender !== 'string' || typeof v.room_code !== 'string' || !v.sender.trim() || !v.room_code.trim()) {
+    return null;
+  }
+  return {
+    sender: v.sender.trim(),
+    room_code: v.room_code.trim(),
+    room_name: typeof v.room_name === 'string' ? v.room_name : '',
+  };
+}
+
+/** Load danh sách phòng đã join (hỗ trợ cả format cũ: 1 object). */
+function loadStoredRooms(): JoinFormValues[] {
   try {
     const raw = localStorage.getItem(CHAT_JOIN_STORAGE_KEY);
-    if (!raw) return null;
-    const v = JSON.parse(raw) as JoinFormValues;
-    if (v && typeof v.sender === 'string' && typeof v.room_code === 'string' && v.sender.trim() && v.room_code.trim()) {
-      return { sender: v.sender.trim(), room_code: v.room_code.trim(), room_name: typeof v.room_name === 'string' ? v.room_name : '' };
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      const list = parsed.map((p: unknown) => normalizeJoinValues(p as Record<string, unknown>)).filter(Boolean) as JoinFormValues[];
+      return list;
     }
+    const single = normalizeJoinValues(parsed as Record<string, unknown>);
+    return single ? [single] : [];
   } catch {
-    // ignore
-  }
-  return null;
-}
-
-function saveStoredJoin(values: JoinFormValues) {
-  try {
-    localStorage.setItem(CHAT_JOIN_STORAGE_KEY, JSON.stringify(values));
-  } catch {
-    // ignore
+    return [];
   }
 }
 
-function clearStoredJoin() {
+function saveStoredRooms(rooms: JoinFormValues[]) {
   try {
-    localStorage.removeItem(CHAT_JOIN_STORAGE_KEY);
+    if (rooms.length === 0) {
+      localStorage.removeItem(CHAT_JOIN_STORAGE_KEY);
+    } else {
+      localStorage.setItem(CHAT_JOIN_STORAGE_KEY, JSON.stringify(rooms));
+    }
   } catch {
     // ignore
   }
@@ -67,19 +77,19 @@ function App() {
   const { systemTheme, setSystemTheme, chatFrameColor, setChatFrameColor, customBackground, setCustomBackground } = useTheme();
   const [formMode, setFormMode] = useState<FormMode>('room');
   const [windows, setWindows] = useState<ChatWindowState[]>(() => {
-    const stored = loadStoredJoin();
-    if (!stored) return [];
-    return [createWindowState(stored, true)];
+    const rooms = loadStoredRooms();
+    return rooms.map((j, i) => createWindowState(j, i === 0));
   });
   const [showThemePanel, setShowThemePanel] = useState(false);
   const [showAddRoom, setShowAddRoom] = useState(false);
 
   const handleJoin = useCallback((values: JoinFormValues) => {
-    saveStoredJoin(values);
     setWindows((prev) => {
       const exists = prev.some((w) => w.joinValues.room_code === values.room_code && w.joinValues.sender === values.sender);
       if (exists) return prev;
-      return [...prev, createWindowState(values, prev.length === 0)];
+      const next = [...prev, createWindowState(values, prev.length === 0)];
+      saveStoredRooms(next.map((w) => w.joinValues));
+      return next;
     });
     setShowAddRoom(false);
   }, []);
@@ -95,9 +105,13 @@ function App() {
   const handleLeave = useCallback((id: string) => {
     setWindows((prev) => {
       const next = prev.filter((w) => w.id !== id);
-      if (next.length === 0) clearStoredJoin();
-      else if (next.every((w) => w.isFloating || w.isMinimized)) {
-        next[0] = { ...next[0], isFloating: false, isMinimized: false };
+      if (next.length > 0) {
+        if (next.every((w) => w.isFloating || w.isMinimized)) {
+          next[0] = { ...next[0], isFloating: false, isMinimized: false };
+        }
+        saveStoredRooms(next.map((w) => w.joinValues));
+      } else {
+        saveStoredRooms([]);
       }
       return next;
     });

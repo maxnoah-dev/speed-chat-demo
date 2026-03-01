@@ -50,20 +50,26 @@ export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBu
     }
   };
 
+  const hasMediaOnly = attachmentsList.length > 0 && !message.content;
+  const hasImageOrVideo = attachmentsList.some(
+    (a) => isImageAttachment(a.url, a.name) || isVideoAttachment(a.url, a.name)
+  );
+
   return (
     <div
       className={cn(
-        'max-w-[78%] rounded-2xl px-4 py-2.5 text-sm break-words transition-smooth',
-        isOwn ? 'ml-auto bg-primary text-primary-foreground shadow-md' : 'bg-card border border-border shadow-sm rounded-tl-md'
+        'max-w-[78%] rounded-2xl text-sm break-words transition-smooth overflow-hidden',
+        isOwn ? 'ml-auto bg-primary text-primary-foreground shadow-md' : 'bg-card border border-border shadow-sm rounded-tl-md',
+        hasMediaOnly && hasImageOrVideo ? 'p-0' : 'px-4 py-2.5'
       )}
     >
       {!isOwn && (
-        <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+        <div className={cn('font-medium text-muted-foreground uppercase tracking-wider mb-1 text-[11px]', hasMediaOnly && hasImageOrVideo ? 'px-4 pt-2' : '')}>
           {message.sender}
         </div>
       )}
       {attachmentsList.length > 0 && (
-        <div className="mb-1.5 space-y-2">
+        <div className={cn('space-y-1', !(hasMediaOnly && hasImageOrVideo) && 'mb-1.5', hasMediaOnly && hasImageOrVideo ? 'px-0' : '')}>
           {attachmentsList.map((att, i) => {
             const fullUrl = getAttachmentFullUrl(att.url);
             const isImage = isImageAttachment(att.url, att.name);
@@ -77,19 +83,19 @@ export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBu
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => handleAttachmentClick(e, att.url, att.name)}
-                  className="inline-block cursor-pointer"
+                  className="block w-full cursor-pointer"
                 >
                   <img
                     src={fullUrl}
                     alt={att.name || 'Ảnh'}
-                    className="max-w-full max-h-[220px] rounded-xl object-cover"
+                    className="w-full max-h-[280px] object-contain bg-transparent"
                   />
                 </a>
               );
             }
             if (isVideo) {
               return (
-                <div key={i} className="rounded-md overflow-hidden max-w-full">
+                <div key={i} className="w-full overflow-hidden bg-transparent">
                   <video
                     src={fullUrl}
                     controls
@@ -97,15 +103,15 @@ export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBu
                     muted
                     loop
                     playsInline
-                    className="max-w-full max-h-[280px] rounded-md"
+                    className="w-full max-h-[280px] object-contain"
                   />
                 </div>
               );
             }
             if (isAudio) {
               return (
-                <div key={i} className="rounded-md">
-                  <audio src={fullUrl} controls className="max-w-full" />
+                <div key={i} className={cn('w-full', !(hasMediaOnly && hasImageOrVideo) && 'rounded-lg')}>
+                  <audio src={fullUrl} controls className="w-full max-w-full" />
                 </div>
               );
             }
@@ -117,19 +123,19 @@ export function MessageBubble({ message, isOwn, onPreviewAttachment }: MessageBu
                 rel="noopener noreferrer"
                 onClick={(e) => handleAttachmentClick(e, att.url, att.name)}
                 className={cn(
-                  'inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm border cursor-pointer',
-                  isOwn ? 'bg-white/10 border-white/20 text-primary-foreground' : 'bg-muted border-border text-foreground'
+                  'inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm cursor-pointer max-w-full',
+                  isOwn ? 'bg-white/10 border border-white/20 text-primary-foreground' : 'bg-muted border border-border text-foreground'
                 )}
               >
                 <span>📎</span>
-                <span>{att.name || 'Tệp đính kèm'}</span>
+                <span className="truncate">{att.name || 'Tệp đính kèm'}</span>
               </a>
             );
           })}
         </div>
       )}
-      {message.content && <div className="whitespace-pre-wrap leading-snug">{message.content}</div>}
-      <div className={cn('text-[11px] mt-1.5 text-right', isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
+      {message.content && <div className={cn('whitespace-pre-wrap leading-snug', (hasMediaOnly && hasImageOrVideo) ? 'px-4 pb-2' : '')}>{message.content}</div>}
+      <div className={cn('text-[11px] mt-1.5 text-right', isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground', (hasMediaOnly && hasImageOrVideo) ? 'px-4 pb-2' : '')}>
         {time}
       </div>
     </div>

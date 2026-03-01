@@ -41,7 +41,8 @@ services:
   be-nodejs:
     container_name: be-nodejs
     build: ./be
-    # env_file: bỏ, chỉ dùng biến môi trường từ --env-file
+    env_file:
+      - .env.production
     environment:
       - NODE_ENV=production
       - PORT=${BE_PORT:-3002}

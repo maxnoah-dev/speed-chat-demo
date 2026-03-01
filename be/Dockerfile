@@ -17,7 +17,7 @@ COPY . .
 RUN yarn build
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+RUN sed -i 's/\r$//' /docker-entrypoint.sh 2>/dev/null || true && chmod +x /docker-entrypoint.sh
 
 EXPOSE 3002
 

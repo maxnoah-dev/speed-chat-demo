@@ -11,5 +11,6 @@ declare module '*.scss' {
 declare const process: {
   env: {
     REACT_APP_API_URL?: string;
+    REACT_APP_GIPHY_API_KEY?: string;
   };
 };

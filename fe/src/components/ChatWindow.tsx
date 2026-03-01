@@ -34,6 +34,10 @@ export function ChatWindow({ state, onStateChange, onLeave, roomCode, isOnlyWind
   const [isResizing, setResizing] = useState(false);
   const dragStart = useRef({ dx: 0, dy: 0 });
   const resizeStart = useRef({ w: 0, h: 0, x: 0, y: 0 });
+  const resizeModeRef = useRef<'se' | 'e' | 's'>('se');
+  const lastPosRef = useRef({ x: 0, y: 0 });
+  const lastSizeRef = useRef({ w: 0, h: 0 });
+  const floatElRef = useRef<HTMLDivElement>(null);
   const [videoActive, setVideoActive] = useState(false);
 
   const handleDragStart = useCallback(
@@ -42,21 +46,28 @@ export function ChatWindow({ state, onStateChange, onLeave, roomCode, isOnlyWind
       const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
       dragStart.current = { dx: clientX - x, dy: clientY - y };
+      lastPosRef.current = { x, y };
       setDragging(true);
     },
     [x, y]
   );
 
   useEffect(() => {
-    if (!isDragging) return;
+    if (!isDragging || !floatElRef.current) return;
+    const el = floatElRef.current;
     const move = (e: MouseEvent | TouchEvent) => {
       const clientX = 'touches' in e ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
       const clientY = 'touches' in e ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
       const nx = Math.max(0, clientX - dragStart.current.dx);
       const ny = Math.max(0, clientY - dragStart.current.dy);
-      onStateChange(id, { x: nx, y: ny });
+      lastPosRef.current = { x: nx, y: ny };
+      el.style.left = `${nx}px`;
+      el.style.top = `${ny}px`;
     };
-    const up = () => setDragging(false);
+    const up = () => {
+      onStateChange(id, { x: lastPosRef.current.x, y: lastPosRef.current.y });
+      setDragging(false);
+    };
     window.addEventListener('mousemove', move);
     window.addEventListener('mouseup', up);
     window.addEventListener('touchmove', move, { passive: false });
@@ -70,29 +81,38 @@ export function ChatWindow({ state, onStateChange, onLeave, roomCode, isOnlyWind
   }, [isDragging, id, onStateChange]);
 
   const handleResizeStart = useCallback(
-    (e: React.MouseEvent | React.TouchEvent) => {
+    (mode: 'se' | 'e' | 's') => (e: React.MouseEvent | React.TouchEvent) => {
       e.preventDefault();
       e.stopPropagation();
       const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      resizeModeRef.current = mode;
       resizeStart.current = { w: width, h: height, x: clientX, y: clientY };
+      lastSizeRef.current = { w: width, h: height };
       setResizing(true);
     },
     [width, height]
   );
 
   useEffect(() => {
-    if (!isResizing) return;
+    if (!isResizing || !floatElRef.current) return;
+    const el = floatElRef.current;
+    const mode = resizeModeRef.current;
     const move = (e: MouseEvent | TouchEvent) => {
       const clientX = 'touches' in e ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
       const clientY = 'touches' in e ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
       const dw = clientX - resizeStart.current.x;
       const dh = clientY - resizeStart.current.y;
-      const nw = Math.max(MIN_W, resizeStart.current.w + dw);
-      const nh = Math.max(MIN_H, resizeStart.current.h + dh);
-      onStateChange(id, { width: nw, height: nh });
+      const nw = (mode === 'e' || mode === 'se') ? Math.max(MIN_W, resizeStart.current.w + dw) : resizeStart.current.w;
+      const nh = (mode === 's' || mode === 'se') ? Math.max(MIN_H, resizeStart.current.h + dh) : resizeStart.current.h;
+      lastSizeRef.current = { w: nw, h: nh };
+      el.style.width = `${nw}px`;
+      el.style.height = `${nh}px`;
     };
-    const up = () => setResizing(false);
+    const up = () => {
+      onStateChange(id, { width: lastSizeRef.current.w, height: lastSizeRef.current.h });
+      setResizing(false);
+    };
     window.addEventListener('mousemove', move);
     window.addEventListener('mouseup', up);
     window.addEventListener('touchmove', move, { passive: false });
@@ -187,14 +207,34 @@ export function ChatWindow({ state, onStateChange, onLeave, roomCode, isOnlyWind
         <ChatRoom joinValues={joinValues} onLeave={() => onLeave(id)} embedded />
       </div>
       {isFloating && (
-        <div
-          className="absolute right-0 bottom-0 w-4 h-4 cursor-se-resize touch-none"
-          onMouseDown={handleResizeStart}
-          onTouchStart={handleResizeStart}
-          aria-hidden
-        >
-          <span className="absolute right-1 bottom-1 border-b-2 border-r-2 border-muted-foreground/50 rounded-sm w-2 h-2" />
-        </div>
+        <>
+          {/* Cạnh phải: kéo ngang để đổi rộng */}
+          <div
+            className="absolute top-0 right-0 w-2 bottom-6 cursor-ew-resize touch-none z-10 hover:bg-primary/10"
+            onMouseDown={handleResizeStart('e')}
+            onTouchStart={handleResizeStart('e')}
+            title="Kéo để đổi độ rộng"
+            aria-hidden
+          />
+          {/* Cạnh dưới: kéo dọc để đổi cao */}
+          <div
+            className="absolute bottom-0 left-0 h-2 right-6 cursor-ns-resize touch-none z-10 hover:bg-primary/10"
+            onMouseDown={handleResizeStart('s')}
+            onTouchStart={handleResizeStart('s')}
+            title="Kéo để đổi chiều cao"
+            aria-hidden
+          />
+          {/* Góc dưới phải: kéo chéo để đổi cả rộng và cao */}
+          <div
+            className="absolute right-0 bottom-0 w-6 h-6 cursor-se-resize touch-none z-10 flex items-center justify-end pb-0.5 pr-0.5"
+            onMouseDown={handleResizeStart('se')}
+            onTouchStart={handleResizeStart('se')}
+            title="Kéo để phóng to / thu nhỏ"
+            aria-hidden
+          >
+            <span className="w-3 h-3 border-2 border-muted-foreground/60 rounded-sm border-b-transparent border-l-transparent" />
+          </div>
+        </>
       )}
     </>
   );
@@ -202,8 +242,9 @@ export function ChatWindow({ state, onStateChange, onLeave, roomCode, isOnlyWind
   if (isFloating) {
     return (
       <div
+        ref={floatElRef}
         className={cn(
-          'fixed z-30 flex flex-col rounded-2xl border-2 chat-frame-border bg-card shadow-2xl overflow-hidden transition-smooth',
+          'fixed z-30 flex flex-col rounded-2xl border-2 chat-frame-border bg-card shadow-2xl overflow-hidden',
           (isDragging || isResizing) && 'pointer-events-none'
         )}
         style={{ left: x, top: y, width, height }}

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '../lib/utils';
 
 const GIPHY_API_KEY = process.env.REACT_APP_GIPHY_API_KEY || '';
+const DEBOUNCE_MS = 350;
 
 interface GifItem {
   id: string;
@@ -29,6 +30,16 @@ async function fetchTrendingGifs(limit = 24): Promise<GifItem[]> {
   return mapGifs(json.data || []);
 }
 
+async function searchGifs(q: string, limit = 20): Promise<GifItem[]> {
+  if (!GIPHY_API_KEY || !q.trim()) return [];
+  const res = await fetch(
+    `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(q.trim())}&limit=${limit}&rating=g`
+  );
+  if (!res.ok) return [];
+  const json = await res.json();
+  return mapGifs(json.data || []);
+}
+
 interface GifPickerProps {
   onSelect: (gifUrl: string) => void;
   onClose?: () => void;
@@ -36,15 +47,32 @@ interface GifPickerProps {
 }
 
 export function GifPicker({ onSelect, onClose, className }: GifPickerProps) {
+  const [query, setQuery] = useState('');
   const [gifs, setGifs] = useState<GifItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setLoading(true);
-    fetchTrendingGifs()
-      .then(setGifs)
-      .finally(() => setLoading(false));
-  }, []);
+    const q = query.trim();
+    if (!q) {
+      setLoading(true);
+      fetchTrendingGifs()
+        .then(setGifs)
+        .finally(() => setLoading(false));
+      return;
+    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      debounceRef.current = null;
+      setLoading(true);
+      searchGifs(q)
+        .then(setGifs)
+        .finally(() => setLoading(false));
+    }, DEBOUNCE_MS);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query]);
 
   if (!GIPHY_API_KEY) {
     return (
@@ -60,11 +88,22 @@ export function GifPicker({ onSelect, onClose, className }: GifPickerProps) {
 
   return (
     <div className={cn('rounded-xl border border-border bg-card shadow-lg overflow-hidden transition-smooth w-[320px]', className)}>
-      <div className="max-h-[280px] overflow-y-auto p-2">
+      <div className="p-2 border-b border-border">
+        <input
+          type="text"
+          placeholder="Tìm GIF..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        />
+      </div>
+      <div className="max-h-[240px] overflow-y-auto p-2">
         {loading && gifs.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-6">Đang tải...</p>
+        ) : gifs.length === 0 && !query.trim() ? (
+          <p className="text-sm text-muted-foreground text-center py-6">Gõ từ khóa để tìm GIF</p>
         ) : gifs.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-6">Không có GIF</p>
+          <p className="text-sm text-muted-foreground text-center py-6">Không tìm thấy GIF</p>
         ) : (
           <div className="grid grid-cols-2 gap-1.5">
             {gifs.map((g) => (

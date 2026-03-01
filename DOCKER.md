@@ -15,3 +15,6 @@ Env: compose đọc **root**. MySQL dùng `.env.mysql`.
 
 **Nếu container be-nodejs báo unhealthy:**  
 Xem log: `docker logs be-nodejs`. Thường do (1) Prisma migrate lỗi (sai `DB_PASSWORD` / `DATABASE_URL` hoặc MySQL chưa sẵn sàng), (2) thiếu biến env trong `.env.production`. Đảm bảo `DB_HOST=mysql`, `DB_PASSWORD` trùng với `.env.mysql`, `DB_NAME=speed_chat`.
+
+**Nếu build Docker báo lỗi `yarn install` (exit code 1):**  
+Trên server chạy build từng service để xem log chi tiết: `docker compose build --no-cache be-nodejs 2>&1` hoặc `docker compose build --no-cache fe-react 2>&1`. Thường do (1) hết RAM khi cài dependency (thử tăng swap hoặc build trên máy có RAM lớn hơn), (2) mạng không tải được package/Prisma engine (Dockerfile đã có retry; kiểm tra proxy/firewall).

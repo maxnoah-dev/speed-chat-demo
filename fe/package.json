@@ -14,6 +14,7 @@
     "lucide-react": "^0.575.0",
     "mammoth": "^1.11.0",
     "react": "^18.2.0",
+    "react-colorful": "^5.6.1",
     "react-dom": "^18.2.0",
     "react-media-recorder": "^1.7.2",
     "react-scripts": "5.0.1",

@@ -5,7 +5,8 @@ import { ChatWindow, type ChatWindowState } from './components/ChatWindow';
 import { useTheme } from './contexts/ThemeContext';
 import type { SystemTheme, ChatFrameColor } from './contexts/ThemeContext';
 import { cn } from './lib/utils';
-import { Sun, Moon, Monitor, Palette } from 'lucide-react';
+import { Sun, Moon, Monitor, Palette, RotateCcw } from 'lucide-react';
+import { HexColorPicker } from 'react-colorful';
 
 const CHAT_JOIN_STORAGE_KEY = 'speed_chat_join';
 
@@ -63,7 +64,7 @@ function createWindowState(joinValues: JoinFormValues, isFirst = false): ChatWin
 }
 
 function App() {
-  const { systemTheme, setSystemTheme, chatFrameColor, setChatFrameColor } = useTheme();
+  const { systemTheme, setSystemTheme, chatFrameColor, setChatFrameColor, customBackground, setCustomBackground } = useTheme();
   const [formMode, setFormMode] = useState<FormMode>('room');
   const [windows, setWindows] = useState<ChatWindowState[]>(() => {
     const stored = loadStoredJoin();
@@ -113,16 +114,18 @@ function App() {
       <div className="min-h-[100dvh] bg-background text-foreground transition-smooth safe-area-top safe-area-bottom">
         <div className="sticky top-0 z-20 flex items-center justify-between gap-2 p-3 border-b border-border bg-card/80 backdrop-blur-md">
           <span className="text-sm font-medium">Chat</span>
-          <ThemeToggles
-            systemTheme={systemTheme}
-            setSystemTheme={setSystemTheme}
-            chatFrameColor={chatFrameColor}
-            setChatFrameColor={setChatFrameColor}
-            showThemePanel={showThemePanel}
-            setShowThemePanel={setShowThemePanel}
-          />
-        </div>
-        <div className="py-6 px-4 md:py-10 md:px-6 max-w-lg mx-auto">
+        <ThemeToggles
+          systemTheme={systemTheme}
+          setSystemTheme={setSystemTheme}
+          chatFrameColor={chatFrameColor}
+          setChatFrameColor={setChatFrameColor}
+          customBackground={customBackground}
+          setCustomBackground={setCustomBackground}
+          showThemePanel={showThemePanel}
+          setShowThemePanel={setShowThemePanel}
+        />
+      </div>
+      <div className="py-6 px-4 md:py-10 md:px-6 max-w-lg mx-auto">
           <div className="flex justify-center gap-2 mb-6">
             <button
               type="button"
@@ -192,6 +195,8 @@ function App() {
           setSystemTheme={setSystemTheme}
           chatFrameColor={chatFrameColor}
           setChatFrameColor={setChatFrameColor}
+          customBackground={customBackground}
+          setCustomBackground={setCustomBackground}
           showThemePanel={showThemePanel}
           setShowThemePanel={setShowThemePanel}
         />
@@ -235,6 +240,8 @@ function ThemeToggles({
   setSystemTheme,
   chatFrameColor,
   setChatFrameColor,
+  customBackground,
+  setCustomBackground,
   showThemePanel,
   setShowThemePanel,
 }: {
@@ -242,6 +249,8 @@ function ThemeToggles({
   setSystemTheme: (t: SystemTheme) => void;
   chatFrameColor: ChatFrameColor;
   setChatFrameColor: (c: ChatFrameColor) => void;
+  customBackground: string | null;
+  setCustomBackground: (hex: string | null) => void;
   showThemePanel: boolean;
   setShowThemePanel: (v: boolean) => void;
 }) {
@@ -267,7 +276,7 @@ function ThemeToggles({
         <Palette className="h-4 w-4 text-muted-foreground" />
       </button>
       {showThemePanel && (
-        <div className="absolute right-0 top-full mt-1 p-3 rounded-xl border border-border bg-card shadow-lg text-sm z-50 min-w-[180px]">
+        <div className="absolute right-0 top-full mt-1 p-3 rounded-xl border border-border bg-card shadow-lg text-sm z-50 min-w-[200px] max-w-[260px]">
           <p className="font-medium text-foreground mb-2">Giao diện</p>
           <div className="flex gap-1 mb-3">
             {[
@@ -290,7 +299,7 @@ function ThemeToggles({
             ))}
           </div>
           <p className="font-medium text-foreground mb-1.5">Màu khung chat</p>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 mb-3">
             {CHAT_FRAME_COLORS.map(({ value, label }) => (
               <button
                 key={value}
@@ -305,6 +314,23 @@ function ThemeToggles({
               </button>
             ))}
           </div>
+          <p className="font-medium text-foreground mb-1.5">Màu nền</p>
+          <div className="mb-2">
+            <HexColorPicker
+              color={customBackground ?? '#f5f3ff'}
+              onChange={setCustomBackground}
+              className="!w-full"
+              style={{ width: '100%' }}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setCustomBackground(null)}
+            className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs bg-muted hover:bg-muted/80 transition-smooth"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Đặt mặc định
+          </button>
         </div>
       )}
     </div>
